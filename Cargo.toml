@@ -1,0 +1,12 @@
+[package]
+name = "ydcv-rs"
+version = "0.1.0"
+authors = ["Jiachen Yang <jc-yang@ist.osaka-u.ac.jp>"]
+
+[dependencies]
+hyper = "*"
+rustc-serialize = "*"
+log = "*"
+env_logger = "*"
+getopts = "*"
+ansi_term = "*"
