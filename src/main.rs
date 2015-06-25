@@ -16,7 +16,6 @@ extern crate ansi_term;
 use ansi_term::Colour::{Red, Yellow, Purple, Cyan};
 use ansi_term::Style;
 
-
 #[macro_use]
 extern crate log;
 extern crate env_logger;
@@ -54,8 +53,8 @@ impl YdResponse {
 		let phonetic = match self.basic {
 			Some(ref basic) => if basic.us_phonetic.is_some() && basic.uk_phonetic.is_some() {
 					format!(" UK: [{}], US: [{}]", 
-						Yellow.paint(&basic.uk_phonetic.clone().unwrap()),
-						Yellow.paint(&basic.us_phonetic.clone().unwrap()))
+						Yellow.paint(basic.uk_phonetic.as_ref().unwrap()),
+						Yellow.paint(basic.us_phonetic.as_ref().unwrap()))
 				}else{
 					match basic.phonetic {
 						Some(ref phonetic) => format!("[{}]", Yellow.paint(&phonetic)) ,
@@ -65,16 +64,17 @@ impl YdResponse {
 			None => "".to_string()
 		};
 
-		if self.basic.is_none() || self.web.is_none(){
+		if self.basic.is_none() && self.web.is_none(){
 			println!("{}", Style::default().underline().paint(&self.query));
-			println!("{}", Red.paint(" -- No result for this query."));
+			println!("  {}", Cyan.paint("Translation:"));
+			println!("    {}", Style::default().paint(&self.translation.connect("；")));
 			return;
 		}
 
 		println!("{} {} {}", 
 			Style::default().underline().paint(&self.query),
 			phonetic,
-			Style::default().paint(&self.translation.connect(""))
+			Style::default().paint(&self.translation.connect("；"))
 			);
 
 		match self.basic {

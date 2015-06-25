@@ -1,4 +1,4 @@
-# YDCV-RS
+# ydcv-rs
 
 A rust version of [ydcv](https://github.com/felixonmars/ydcv/).
 
