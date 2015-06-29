@@ -17,13 +17,14 @@ mod ydclient;
 
 use ydclient::YdClient;
 
-
+#[allow(dead_code)]
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} [options] words", program);
     print!("{}", opts.usage(&brief));
 }
 
 
+#[allow(dead_code)]
 fn main() {
 	env_logger::init().unwrap();
 
@@ -44,7 +45,10 @@ fn main() {
 	let mut client = Client::new();
 
 	for word in matches.free {
-	    client.lookup_word(&word).print_explain();
+		match client.lookup_word(&word){
+			Ok(ref result) => result.print_explain(),
+			Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+		}
 	}
 	return;
 }
