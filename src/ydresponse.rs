@@ -1,6 +1,4 @@
-use ansi_term::Colour::{Red, Yellow, Purple, Cyan};
-use ansi_term::Style;
-
+use ::formatters::Formatter;
 
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdBasic{
@@ -30,29 +28,29 @@ pub struct YdResponse{
 
 
 impl YdResponse {
-    pub fn explain(&self) -> String {
+    pub fn explain(&self, fmt: &Formatter) -> String {
         let mut result: Vec<String> = vec!();
 
         if self.errorCode != 0 {
-            result.push(format!("{}", Red.paint(" -- No result for this query.")));
+            result.push(fmt.red(" -- No result for this query."));
             return result.connect("\n");
         }
 
         if self.basic.is_none() && self.web.is_none(){
-            result.push(format!("{}", Style::default().underline().paint(&self.query)));
-            result.push(format!("  {}", Cyan.paint("Translation:")));
-            result.push(format!("    {}", Style::default().paint(&self.translation.connect("；"))));
+            result.push(format!("{}", fmt.underline(&self.query)));
+            result.push(format!("  {}", fmt.cyan("Translation:")));
+            result.push(format!("    {}", fmt.default(&self.translation.connect("；"))));
             return result.connect("\n");
         }
 
         let phonetic = match self.basic {
             Some(ref basic) => if basic.us_phonetic.is_some() && basic.uk_phonetic.is_some() {
                     format!(" UK: [{}], US: [{}]", 
-                        Yellow.paint(basic.uk_phonetic.as_ref().unwrap()),
-                        Yellow.paint(basic.us_phonetic.as_ref().unwrap()))
+                        fmt.yellow(basic.uk_phonetic.as_ref().unwrap()),
+                        fmt.yellow(basic.us_phonetic.as_ref().unwrap()))
                 }else{
                     match basic.phonetic {
-                        Some(ref phonetic) => format!("[{}]", Yellow.paint(&phonetic)) ,
+                        Some(ref phonetic) => format!("[{}]", fmt.yellow(&phonetic)) ,
                         None => "".to_string()
                     }
                 },
@@ -60,17 +58,17 @@ impl YdResponse {
         };
 
         result.push(format!("{} {} {}",
-            Style::default().underline().paint(&self.query),
+            fmt.underline(&self.query),
             phonetic,
-            Style::default().paint(&self.translation.connect("；"))
+            fmt.default(&self.translation.connect("；"))
             ));
 
         match self.basic {
             Some(ref basic) => {
                 if basic.explains.len() > 0{
-                    result.push(format!("  {}", Cyan.paint("Word Explanation:")));
+                    result.push(format!("  {}", fmt.cyan("Word Explanation:")));
                     for exp in &basic.explains {
-                        result.push(format!("     * {0}", Style::default().paint(&exp)));
+                        result.push(format!("     * {0}", fmt.default(&exp)));
                     }
                 }
             },
@@ -80,11 +78,11 @@ impl YdResponse {
         match self.web {
             Some(ref web) => {
                 if web.len() > 0{
-                    result.push(format!("  {}", Cyan.paint("Web Reference:")));
+                    result.push(format!("  {}", fmt.cyan("Web Reference:")));
                     for item in web {
-                        result.push(format!("     * {0}", Yellow.paint(&item.key)));
+                        result.push(format!("     * {0}", fmt.yellow(&item.key)));
                         result.push(format!("       {0}", item.value.iter()
-                            .map(|x| Purple.paint(x).to_string())
+                            .map(|x| fmt.purple(x))
                             .collect::<Vec<_>>()
                             .connect("；")));
                     }

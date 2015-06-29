@@ -16,19 +16,14 @@ use hyper::Client;
 
 mod ydresponse;
 mod ydclient;
-
+mod formatters;
 
 use ydclient::YdClient;
+use formatters::{Formatter, AnsiFormatter, HtmlFormatter};
 
-
-fn print_usage(program: &str, opts: Options) {
-    let brief = format!("Usage: {} [options] words", program);
-    print!("{}", opts.usage(&brief));
-}
-
-fn lookup_explain(client: &mut Client, word: &String){
-        match client.lookup_word(&word){
-        Ok(ref result) =>  println!("{}", result.explain()),
+fn lookup_explain(client: &mut Client, word: &String, fmt: &Formatter){
+    match client.lookup_word(&word){
+        Ok(ref result) =>  println!("{}", result.explain(fmt)),
         Err(err) => println!("Error during lookup word {}: {:?}", word, err)
     }
 }
@@ -50,6 +45,7 @@ fn main() {
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("x", "selection", "show explaination of current selection");
+    opts.optflag("H", "HTML", "HTML output");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
@@ -57,15 +53,25 @@ fn main() {
     };
 
     if matches.opt_present("h") {
-        print_usage(&args[0].clone(), opts);
+        let brief = format!("Usage: {} [options] words", args[0]);
+        print!("{}", opts.usage(&brief));
         return;
     }
 
     let mut client = Client::new();
 
+    let html = HtmlFormatter;
+    let ansi = AnsiFormatter;
+
+    let fmt : &Formatter = if matches.opt_present("H") {
+        &html
+    }else{
+        &ansi
+    };
+
     if matches.free.len() > 0 {
         for word in matches.free {
-            lookup_explain(&mut client, &word);
+            lookup_explain(&mut client, &word, fmt);
         }
     } else {
         if matches.opt_present("x") {
@@ -74,19 +80,17 @@ fn main() {
             loop {
                 thread::sleep_ms(100);
                 let curr = get_clipboard();
-
                 if curr != last {
                     last = curr.clone();
                     if last.len() > 0 {
-                        lookup_explain(&mut client, &curr);
-                        println!("Waiting for selection> ");
+                        lookup_explain(&mut client, &curr, fmt);
+                        print!("Waiting for selection> ");
                     }
                 }
-
             }
         } else {
             while let Some(word) =  linenoise::input("> ") {
-                lookup_explain(&mut client, &word);
+                lookup_explain(&mut client, &word, fmt);
                 linenoise::history_add(&word);
             }
         }
