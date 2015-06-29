@@ -1,5 +1,7 @@
 # ydcv-rs
 
+[![Build Status](https://travis-ci.org/farseerfc/ydcv-rs.svg)](https://travis-ci.org/farseerfc/ydcv-rs)
+
 A rust version of [ydcv](https://github.com/felixonmars/ydcv/).
 
 # (Original) YouDao Console Version
