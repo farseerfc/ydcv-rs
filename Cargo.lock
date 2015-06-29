@@ -6,6 +6,7 @@ dependencies = [
  "env_logger 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "linenoise-rust 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -101,6 +102,15 @@ version = "2.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "pnacl-build-helper 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "linenoise-rust"
+version = "0.1.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "gcc 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

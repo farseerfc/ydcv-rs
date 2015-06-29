@@ -5,6 +5,7 @@ extern crate ansi_term;
 extern crate log;
 extern crate env_logger;
 extern crate getopts;
+extern crate linenoise;
 
 use std::env;
 use getopts::Options;
@@ -33,8 +34,8 @@ fn main() {
     opts.optflag("h", "help", "print this help menu");
 
     let matches = match opts.parse(&args[1..]){
-        Ok(m) => { m }
-        Err(f) => { panic!(f.to_string()) }
+        Ok(m) => m,
+        Err(f) => panic!(f.to_string())
     };
 
     if matches.opt_present("h") {
@@ -44,10 +45,20 @@ fn main() {
 
     let mut client = Client::new();
 
-    for word in matches.free {
-        match client.lookup_word(&word){
-            Ok(ref result) =>  println!("{}", result.explain()),
-            Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+    if matches.free.len() > 0 {
+        for word in matches.free {
+            match client.lookup_word(&word){
+                Ok(ref result) =>  println!("{}", result.explain()),
+                Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+            }
+        }
+    } else {
+        while let Some(word) =  linenoise::input("> ") {
+            match client.lookup_word(&word){
+                Ok(ref result) =>  println!("{}", result.explain()),
+                Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+            }
+            linenoise::history_add(&word);
         }
     }
     return;
