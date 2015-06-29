@@ -26,29 +26,29 @@ fn print_usage(program: &str, opts: Options) {
 
 #[allow(dead_code)]
 fn main() {
-	env_logger::init().unwrap();
+    env_logger::init().unwrap();
 
-	let args: Vec<String> = env::args().collect();
-	let mut opts = Options::new();
-	opts.optflag("h", "help", "print this help menu");
+    let args: Vec<String> = env::args().collect();
+    let mut opts = Options::new();
+    opts.optflag("h", "help", "print this help menu");
 
-	let matches = match opts.parse(&args[1..]){
-		Ok(m) => { m }
-		Err(f) => { panic!(f.to_string()) }
-	};
+    let matches = match opts.parse(&args[1..]){
+        Ok(m) => { m }
+        Err(f) => { panic!(f.to_string()) }
+    };
 
-	if matches.opt_present("h") {
-		print_usage(&args[0].clone(), opts);
-		return;
-	}
+    if matches.opt_present("h") {
+        print_usage(&args[0].clone(), opts);
+        return;
+    }
 
-	let mut client = Client::new();
+    let mut client = Client::new();
 
-	for word in matches.free {
-		match client.lookup_word(&word){
-			Ok(ref result) =>  println!("{}", result.explain()),
-			Err(err) => println!("Error during lookup word {}: {:?}", word, err)
-		}
-	}
-	return;
+    for word in matches.free {
+        match client.lookup_word(&word){
+            Ok(ref result) =>  println!("{}", result.explain()),
+            Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+        }
+    }
+    return;
 }
