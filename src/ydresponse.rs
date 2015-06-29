@@ -18,6 +18,7 @@ pub struct YdWeb{
 }
 
 
+#[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdResponse{
 	query: String,
@@ -89,5 +90,16 @@ impl YdResponse {
 			},
 			None => ()
 		}
+	}
+}
+
+
+// For testing
+
+use std::fmt;
+
+impl fmt::Display for YdResponse {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+		 write!(f, "YdResponse('{}')", self.query)
 	}
 }
