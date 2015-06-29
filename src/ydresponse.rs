@@ -30,10 +30,19 @@ pub struct YdResponse{
 
 
 impl YdResponse {
-	pub fn print_explain(&self) {
+	pub fn explain(&self) -> String {
+		let mut result: Vec<String> = vec!();
+
 		if self.errorCode != 0 {
-			println!("{}", Red.paint(" -- No result for this query."));
-			return;
+			result.push(format!("{}", Red.paint(" -- No result for this query.")));
+			return result.connect("\n");
+		}
+
+		if self.basic.is_none() && self.web.is_none(){
+			result.push(format!("{}", Style::default().underline().paint(&self.query)));
+			result.push(format!("  {}", Cyan.paint("Translation:")));
+			result.push(format!("    {}", Style::default().paint(&self.translation.connect("；"))));
+			return result.connect("\n");
 		}
 
 		let phonetic = match self.basic {
@@ -50,25 +59,18 @@ impl YdResponse {
 			None => "".to_string()
 		};
 
-		if self.basic.is_none() && self.web.is_none(){
-			println!("{}", Style::default().underline().paint(&self.query));
-			println!("  {}", Cyan.paint("Translation:"));
-			println!("    {}", Style::default().paint(&self.translation.connect("；")));
-			return;
-		}
-
-		println!("{} {} {}", 
+		result.push(format!("{} {} {}",
 			Style::default().underline().paint(&self.query),
 			phonetic,
 			Style::default().paint(&self.translation.connect("；"))
-			);
+			));
 
 		match self.basic {
 			Some(ref basic) => {
 				if basic.explains.len() > 0{
-					println!("  {}", Cyan.paint("Word Explanation:"));
+					result.push(format!("  {}", Cyan.paint("Word Explanation:")));
 					for exp in &basic.explains {
-						println!("     * {0}", Style::default().paint(&exp));
+						result.push(format!("     * {0}", Style::default().paint(&exp)));
 					}
 				}
 			},
@@ -78,18 +80,20 @@ impl YdResponse {
 		match self.web {
 			Some(ref web) => {
 				if web.len() > 0{
-					println!("  {}", Cyan.paint("Web Reference:"));
+					result.push(format!("  {}", Cyan.paint("Web Reference:")));
 					for item in web {
-						println!("     * {0}", Yellow.paint(&item.key));
-						println!("       {0}", item.value.iter()
+						result.push(format!("     * {0}", Yellow.paint(&item.key)));
+						result.push(format!("       {0}", item.value.iter()
 							.map(|x| Purple.paint(x).to_string())
 							.collect::<Vec<_>>()
-							.connect("；"));
+							.connect("；")));
 					}
 				}
 			},
 			None => ()
 		}
+
+		result.connect("\n")
 	}
 }
 

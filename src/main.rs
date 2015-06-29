@@ -46,7 +46,7 @@ fn main() {
 
 	for word in matches.free {
 		match client.lookup_word(&word){
-			Ok(ref result) => result.print_explain(),
+			Ok(ref result) =>  println!("{}", result.explain()),
 			Err(err) => println!("Error during lookup word {}: {:?}", word, err)
 		}
 	}
