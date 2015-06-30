@@ -110,7 +110,7 @@ impl fmt::Display for YdResponse {
 mod tests {
     use ::ydclient::*;
     use hyper::Client;
-    use ::formatters::{AnsiFormatter, HtmlFormatter};
+    use ::formatters::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
     #[test]
     fn test_explain_ansi(){
@@ -131,6 +131,27 @@ mod tests {
     Client::new()
         .lookup_word("hello").unwrap()
         .explain(&AnsiFormatter)));
+    }
+
+    #[test]
+    fn test_explain_plain(){
+        assert_eq!("
+hello [hə'ləʊ; he-] 你好
+  Word Explanation:
+     * n. 表示问候， 惊奇或唤起注意时的用语
+     * int. 喂；哈罗
+     * n. (Hello)人名；(法)埃洛
+  Web Reference:
+     * Hello
+       你好；您好；哈啰
+     * Hello Kitty
+       凯蒂猫；昵称；匿称
+     * hello bebe
+       哈乐哈乐；乐扣乐扣
+",format!("\n{}\n",
+    Client::new()
+        .lookup_word("hello").unwrap()
+        .explain(&PlainFormatter)));
     }
 
     #[test]

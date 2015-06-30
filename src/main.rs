@@ -7,8 +7,10 @@ extern crate env_logger;
 extern crate getopts;
 extern crate linenoise;
 extern crate notify_rust;
+extern crate libc;
 
 use std::env;
+use libc::funcs::posix88::unistd::isatty;
 use std::process::Command;
 use std::thread;
 use getopts::Options;
@@ -19,7 +21,7 @@ mod ydclient;
 mod formatters;
 
 use ydclient::YdClient;
-use formatters::{Formatter, AnsiFormatter, HtmlFormatter};
+use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &Formatter){
     match client.lookup_word(word){
@@ -48,6 +50,7 @@ fn main() {
     opts.optflag("x", "selection", "show explaination of current selection");
     opts.optflag("H", "html", "HTML-style output");
     opts.optflag("n", "notify", "send desktop notifications (implies -H)");
+    opts.optopt("c", "color", "use color (auto, always, never)", "auto");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
@@ -64,11 +67,23 @@ fn main() {
 
     let html = HtmlFormatter::new(matches.opt_present("n"));
     let ansi = AnsiFormatter;
+    let plain = PlainFormatter;
 
     let fmt :&Formatter = if matches.opt_present("H") || matches.opt_present("n") {
         &html
-    }else{ 
-        &ansi
+    }else{
+        match matches.opt_str("c") {
+            Some(c) => if c == "always" || unsafe{ isatty(1) == 1} && c != "never" {
+                    &ansi
+                } else {
+                    &plain
+                },
+            _ => if unsafe{ isatty(1) == 1 } {
+                    &ansi
+                } else {
+                    &plain
+                }
+        }
     };
 
     if matches.free.len() > 0 {

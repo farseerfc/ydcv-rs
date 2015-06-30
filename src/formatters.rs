@@ -14,6 +14,20 @@ pub trait Formatter {
     fn print (&self, word: &str, body: &str);
 }
 
+pub struct PlainFormatter;
+
+impl Formatter for PlainFormatter {
+    fn default   (&self, s: &str) -> String { s.to_string() }
+    fn red       (&self, s: &str) -> String { s.to_string() }
+    fn yellow    (&self, s: &str) -> String { s.to_string() }
+    fn purple    (&self, s: &str) -> String { s.to_string() }
+    fn cyan      (&self, s: &str) -> String { s.to_string() }
+
+    fn underline (&self, s: &str) -> String { s.to_string() }
+
+    fn print (&self, _: &str, body: &str) { println!("{}", body); }
+}
+
 pub struct AnsiFormatter;
 
 impl Formatter for AnsiFormatter {
