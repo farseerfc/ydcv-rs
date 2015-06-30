@@ -17,7 +17,7 @@ pub trait Formatter {
 pub struct AnsiFormatter;
 
 impl Formatter for AnsiFormatter {
-	fn default   (&self, s: &str) -> String { s.to_string() }
+    fn default   (&self, s: &str) -> String { s.to_string() }
     fn red       (&self, s: &str) -> String { Red.paint(s).to_string() }
     fn yellow    (&self, s: &str) -> String { Yellow.paint(s).to_string() }
     fn purple    (&self, s: &str) -> String { Purple.paint(s).to_string() }
