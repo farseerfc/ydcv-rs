@@ -6,13 +6,13 @@ extern crate log;
 extern crate env_logger;
 extern crate getopts;
 extern crate linenoise;
+extern crate notify_rust;
 
 use std::env;
 use std::process::Command;
 use std::thread;
 use getopts::Options;
 use hyper::Client;
-
 
 mod ydresponse;
 mod ydclient;
@@ -21,10 +21,11 @@ mod formatters;
 use ydclient::YdClient;
 use formatters::{Formatter, AnsiFormatter, HtmlFormatter};
 
-fn lookup_explain(client: &mut Client, word: &String, fmt: &Formatter){
-    match client.lookup_word(&word){
-        Ok(ref result) =>  println!("{}", result.explain(fmt)),
-        Err(err) => println!("Error during lookup word {}: {:?}", word, err)
+fn lookup_explain(client: &mut Client, word: &str, fmt: &Formatter){
+    match client.lookup_word(word){
+        Ok(ref result) => fmt.print(word, &result.explain(fmt)),
+        Err(err) => fmt.print(word, 
+            &format!("Error looking-up word {}: {:?}", word, err))
     }
 }
 
@@ -45,7 +46,8 @@ fn main() {
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("x", "selection", "show explaination of current selection");
-    opts.optflag("H", "HTML", "HTML output");
+    opts.optflag("H", "html", "HTML-style output");
+    opts.optflag("n", "notify", "send desktop notification (implies -H)");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
@@ -60,10 +62,14 @@ fn main() {
 
     let mut client = Client::new();
 
-    let html = HtmlFormatter;
+    let html = HtmlFormatter::new(matches.opt_present("n"));
     let ansi = AnsiFormatter;
 
-    let fmt :&Formatter = if matches.opt_present("H") { &html }else{ &ansi };
+    let fmt :&Formatter = if matches.opt_present("H") || matches.opt_present("n") {
+        &html
+    }else{ 
+        &ansi
+    };
 
     if matches.free.len() > 0 {
         for word in matches.free {
@@ -72,7 +78,7 @@ fn main() {
     } else {
         if matches.opt_present("x") {
             let mut last = get_clipboard();
-            print!("Waiting for selection> ");
+            println!("Waiting for selection> ");
             loop {
                 thread::sleep_ms(100);
                 let curr = get_clipboard();
@@ -80,7 +86,7 @@ fn main() {
                     last = curr.clone();
                     if last.len() > 0 {
                         lookup_explain(&mut client, &curr, fmt);
-                        print!("Waiting for selection> ");
+                        println!("Waiting for selection> ");
                     }
                 }
             }

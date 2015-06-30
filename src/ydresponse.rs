@@ -151,7 +151,7 @@ mod tests {
 "#,format!("\n{}\n",
     Client::new()
         .lookup_word("hello").unwrap()
-        .explain(&HtmlFormatter)));
+        .explain(&HtmlFormatter::new(false))));
     }
 
     #[test]
@@ -163,7 +163,7 @@ mod tests {
 "#,format!("\n{}\n",
     Client::new()
         .lookup_word("asdakda").unwrap()
-        .explain(&HtmlFormatter)));
+        .explain(&HtmlFormatter::new(false))));
     }
 
 }
