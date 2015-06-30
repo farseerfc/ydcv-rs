@@ -55,8 +55,10 @@ impl Formatter for HtmlFormatter {
     fn print (&self, word: &str, body: &str) {
         if self.notify {
             Notification::new()
+                .appname("ydcv")
                 .summary(word)
                 .body(body)
+                .timeout(30000)
                 .show();
         }else{
             println!("{}", body);

@@ -136,17 +136,17 @@ mod tests {
     #[test]
     fn test_explain_html_0(){
         assert_eq!(r#"
-<u>hello</u> [<span color="yellow">hə'ləʊ; he-</span>] 你好
-<span color="cyan">  Word Explanation:</span>
+<u>hello</u> [<span color="goldenrod">hə'ləʊ; he-</span>] 你好
+<span color="navy">  Word Explanation:</span>
      * n. 表示问候， 惊奇或唤起注意时的用语
      * int. 喂；哈罗
      * n. (Hello)人名；(法)埃洛
-<span color="cyan">  Web Reference:</span>
-     * <span color="yellow">Hello</span>
+<span color="navy">  Web Reference:</span>
+     * <span color="goldenrod">Hello</span>
        <span color="purple">你好</span>；<span color="purple">您好</span>；<span color="purple">哈啰</span>
-     * <span color="yellow">Hello Kitty</span>
+     * <span color="goldenrod">Hello Kitty</span>
        <span color="purple">凯蒂猫</span>；<span color="purple">昵称</span>；<span color="purple">匿称</span>
-     * <span color="yellow">hello bebe</span>
+     * <span color="goldenrod">hello bebe</span>
        <span color="purple">哈乐哈乐</span>；<span color="purple">乐扣乐扣</span>
 "#,format!("\n{}\n",
     Client::new()
@@ -158,7 +158,7 @@ mod tests {
     fn test_explain_html_1(){
         assert_eq!(r#"
 <u>asdakda</u>
-<span color="cyan">  Translation:</span>
+<span color="navy">  Translation:</span>
     asdakda
 "#,format!("\n{}\n",
     Client::new()

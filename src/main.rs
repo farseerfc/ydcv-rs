@@ -47,7 +47,7 @@ fn main() {
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("x", "selection", "show explaination of current selection");
     opts.optflag("H", "html", "HTML-style output");
-    opts.optflag("n", "notify", "send desktop notification (implies -H)");
+    opts.optflag("n", "notify", "send desktop notifications (implies -H)");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
