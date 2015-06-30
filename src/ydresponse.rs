@@ -109,9 +109,11 @@ impl fmt::Display for YdResponse {
 mod tests {
     use ::ydclient::*;
     use hyper::Client;
+    use ::formatters::AnsiFormatter;
 
     #[test]
     fn test_explain_0(){
+        let fmt = AnsiFormatter;
         assert_eq!("
 \x1b[4mhello\x1b[0m [\x1b[33mhə'ləʊ; he-\x1b[0m] 你好
   \x1b[36mWord Explanation:\x1b[0m
@@ -125,7 +127,7 @@ mod tests {
        \x1b[35m凯蒂猫\x1b[0m；\x1b[35m昵称\x1b[0m；\x1b[35m匿称\x1b[0m
      * \x1b[33mhello bebe\x1b[0m
        \x1b[35m哈乐哈乐\x1b[0m；\x1b[35m乐扣乐扣\x1b[0m
-",format!("\n{}\n", Client::new().lookup_word("hello").unwrap().explain()));
+",format!("\n{}\n", Client::new().lookup_word("hello").unwrap().explain(&fmt)));
     }
 
 }
