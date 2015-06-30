@@ -21,7 +21,7 @@ pub struct YdWeb{
 pub struct YdResponse{
     query: String,
     errorCode: i32,
-    translation: Vec<String>,
+    translation: Option<Vec<String>>,
     basic: Option<YdBasic>,
     web: Option<Vec<YdWeb>>
 }
@@ -36,10 +36,15 @@ impl YdResponse {
             return result.connect("\n");
         }
 
+        if self.basic.is_none() && self.web.is_none() && self.translation.is_none() {
+            result.push(fmt.red(" -- No result for this query."));
+            return result.connect("\n");
+        }
+
         if self.basic.is_none() && self.web.is_none(){
             result.push(fmt.underline(&self.query));
             result.push(fmt.cyan("  Translation:"));
-            result.push("    ".to_string() + &self.translation.connect("；"));
+            result.push("    ".to_string() + &self.translation.as_ref().unwrap().connect("；"));
             return result.connect("\n");
         }
 
@@ -61,7 +66,7 @@ impl YdResponse {
         result.push(format!("{} {} {}",
             fmt.underline(&self.query),
             phonetic,
-            fmt.default(&self.translation.connect("；"))
+            fmt.default(&self.translation.as_ref().unwrap().connect("；"))
             ));
 
         match self.basic {
