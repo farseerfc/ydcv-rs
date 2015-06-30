@@ -40,8 +40,7 @@ impl YdClient for Client {
         let mut body = String::new();
 
         try!(
-            try!(self.get(&url.serialize())
-                     .send())
+            try!(self.get(&url.serialize()).send())
             .read_to_string(&mut body));
         
         debug!("Recieved JSON {}", Json::from_str(&body).unwrap().pretty());

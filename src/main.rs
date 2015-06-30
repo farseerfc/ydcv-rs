@@ -63,11 +63,7 @@ fn main() {
     let html = HtmlFormatter;
     let ansi = AnsiFormatter;
 
-    let fmt : &Formatter = if matches.opt_present("H") {
-        &html
-    }else{
-        &ansi
-    };
+    let fmt :&Formatter = if matches.opt_present("H") { &html }else{ &ansi };
 
     if matches.free.len() > 0 {
         for word in matches.free {
