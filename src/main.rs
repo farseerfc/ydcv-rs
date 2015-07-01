@@ -5,7 +5,7 @@ extern crate ansi_term;
 extern crate log;
 extern crate env_logger;
 extern crate getopts;
-extern crate linenoise;
+extern crate readline;
 extern crate notify_rust;
 extern crate libc;
 
@@ -13,8 +13,10 @@ use std::env;
 use libc::funcs::posix88::unistd::isatty;
 use std::process::Command;
 use std::thread;
+use std::ffi::{CStr, CString};
 use getopts::Options;
 use hyper::Client;
+
 
 mod ydresponse;
 mod ydclient;
@@ -23,9 +25,12 @@ mod formatters;
 use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
-fn lookup_explain(client: &mut Client, word: &str, fmt: &Formatter){
+fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter){
     match client.lookup_word(word){
-        Ok(ref result) => fmt.print(word, &result.explain(fmt)),
+        Ok(ref result) => {
+            let exp = result.explain(fmt);
+            fmt.print(word, &exp);
+        }
         Err(err) => fmt.print(word, 
             &format!("Error looking-up word {}: {:?}", word, err))
     }
@@ -65,23 +70,23 @@ fn main() {
 
     let mut client = Client::new();
 
-    let html = HtmlFormatter::new(matches.opt_present("n"));
-    let ansi = AnsiFormatter;
-    let plain = PlainFormatter;
+    let mut html = HtmlFormatter::new(matches.opt_present("n"));
+    let mut ansi = AnsiFormatter;
+    let mut plain = PlainFormatter;
 
-    let fmt :&Formatter = if matches.opt_present("H") || matches.opt_present("n") {
-        &html
+    let fmt :&mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
+        &mut html
     }else{
         match matches.opt_str("c") {
             Some(c) => if c == "always" || unsafe{ isatty(1) == 1} && c != "never" {
-                    &ansi
+                    &mut ansi
                 } else {
-                    &plain
+                    &mut plain
                 },
             _ => if unsafe{ isatty(1) == 1 } {
-                    &ansi
+                    &mut ansi
                 } else {
-                    &plain
+                    &mut plain
                 }
         }
     };
@@ -106,9 +111,8 @@ fn main() {
                 }
             }
         } else {
-            while let Some(word) =  linenoise::input("> ") {
-                lookup_explain(&mut client, &word, fmt);
-                linenoise::history_add(&word);
+            while let Ok(result) =  unsafe{ readline::readline(CStr::from_ptr(CString::new("> ").unwrap().as_ptr())) } {
+                lookup_explain(&mut client, &String::from_utf8_lossy(&result.to_bytes()), fmt);
             }
         }
     }

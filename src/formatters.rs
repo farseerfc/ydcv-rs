@@ -11,7 +11,7 @@ pub trait Formatter {
     fn underline (&self, &str) -> String;
     fn default   (&self, &str) -> String;
 
-    fn print (&self, word: &str, body: &str);
+    fn print (&mut self, word: &str, body: &str);
 }
 
 pub struct PlainFormatter;
@@ -25,7 +25,7 @@ impl Formatter for PlainFormatter {
 
     fn underline (&self, s: &str) -> String { s.to_string() }
 
-    fn print (&self, _: &str, body: &str) { println!("{}", body); }
+    fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
 pub struct AnsiFormatter;
@@ -41,19 +41,21 @@ impl Formatter for AnsiFormatter {
         Style::default().underline().paint(s).to_string()
     }
 
-    fn print (&self, _: &str, body: &str) {
+    fn print (&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
 }
 
 pub struct HtmlFormatter{
     notify: bool,
+    notifier: Notification,
 }
 
 impl HtmlFormatter{
     pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter{
-            notify: notify
+            notify: notify,
+            notifier: Notification::new()
         }
     }
 }
@@ -66,14 +68,14 @@ impl Formatter for HtmlFormatter {
     fn underline (&self, s: &str) -> String { format!(r#"<u>{}</u>"#, s) }
     fn default   (&self, s: &str) -> String { format!(r#"{}"#, s) }
 
-    fn print (&self, word: &str, body: &str) {
+    fn print (&mut self, word: &str, body: &str) {
         if self.notify {
-            Notification::new()
+            self.notifier
                 .appname("ydcv")
                 .summary(word)
                 .body(body)
                 .timeout(30000)
-                .show();
+                .update();
         }else{
             println!("{}", body);
         }
