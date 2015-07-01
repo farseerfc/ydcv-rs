@@ -9,12 +9,7 @@ extern crate readline;
 extern crate notify_rust;
 extern crate libc;
 
-use std::env;
 use libc::funcs::posix88::unistd::isatty;
-use std::process::Command;
-use std::thread;
-use std::ffi::{CStr, CString};
-use getopts::Options;
 use hyper::Client;
 
 
@@ -37,7 +32,7 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter){
 }
 
 fn get_clipboard() -> String {
-    if let Ok(out) = Command::new("xsel").arg("-o").output() {
+    if let Ok(out) = std::process::Command::new("xsel").arg("-o").output() {
         if let Ok(result) = String::from_utf8(out.stdout) {
             return result;
         }
@@ -49,13 +44,13 @@ fn get_clipboard() -> String {
 fn main() {
     env_logger::init().unwrap();
 
-    let args: Vec<String> = env::args().collect();
-    let mut opts = Options::new();
+    let args: Vec<String> = std::env::args().collect();
+    let mut opts = getopts::Options::new();
     opts.optflag("h", "help", "print this help menu");
     opts.optflag("x", "selection", "show explaination of current selection");
     opts.optflag("H", "html", "HTML-style output");
     opts.optflag("n", "notify", "send desktop notifications (implies -H)");
-    opts.optopt("c", "color", "use color (auto, always, never)", "auto");
+    opts.optopt("c", "color", "[auto, always, never] use color", "auto");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
@@ -100,7 +95,7 @@ fn main() {
             let mut last = get_clipboard();
             println!("Waiting for selection> ");
             loop {
-                thread::sleep_ms(100);
+                std::thread::sleep_ms(100);
                 let curr = get_clipboard();
                 if curr != last {
                     last = curr.clone();
@@ -111,8 +106,10 @@ fn main() {
                 }
             }
         } else {
-            while let Ok(result) =  unsafe{ readline::readline(CStr::from_ptr(CString::new("> ").unwrap().as_ptr())) } {
-                lookup_explain(&mut client, &String::from_utf8_lossy(&result.to_bytes()), fmt);
+            let prompt = std::ffi::CString::new("> ").unwrap();
+            while let Ok(result) = readline::readline(&prompt) {
+                let word = String::from_utf8_lossy(&result.to_bytes());
+                lookup_explain(&mut client, &word, fmt);
             }
         }
     }

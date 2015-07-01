@@ -1,6 +1,5 @@
 use ansi_term::Colour::{Red, Yellow, Purple, Cyan};
 use ansi_term::Style;
-
 use notify_rust::Notification;
 
 pub trait Formatter {
