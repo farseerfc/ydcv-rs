@@ -1,5 +1,8 @@
+//! parser for the returned result from YD
+
 use ::formatters::Formatter;
 
+/// Basic result structure
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdBasic{
     explains: Vec<String>,
@@ -8,14 +11,14 @@ pub struct YdBasic{
     uk_phonetic: Option<String>
 }
 
-
+/// Web result structure
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdWeb{
     key: String,
     value: Vec<String>
 }
 
-
+/// Full response structure  
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdResponse{
@@ -28,15 +31,12 @@ pub struct YdResponse{
 
 
 impl YdResponse {
+    /// Explain the result in text format using a formatter
     pub fn explain(&self, fmt: &Formatter) -> String {
         let mut result: Vec<String> = vec!();
 
-        if self.errorCode != 0 {
-            result.push(fmt.red(" -- No result for this query."));
-            return result.connect("\n");
-        }
-
-        if self.basic.is_none() && self.web.is_none() && self.translation.is_none() {
+        if self.errorCode != 0 || 
+            self.basic.is_none() && self.web.is_none() && self.translation.is_none(){
             result.push(fmt.red(" -- No result for this query."));
             return result.connect("\n");
         }
@@ -47,7 +47,6 @@ impl YdResponse {
             result.push("    ".to_string() + &self.translation.as_ref().unwrap().connect("；"));
             return result.connect("\n");
         }
-
 
         let phonetic = match self.basic {
             Some(ref basic) => match (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {

@@ -20,9 +20,19 @@ const API_KEY: &'static str = "659600698";
 /// Wrapper trait on `hypper::Client`
 pub trait YdClient{
     /// lookup a word on YD and returns a `YdPreponse`
+    ///
+    /// # Examples 
+    ///
+    /// lookup "hello" and compare the result:
+    ///
+    /// ```
+    /// assert_eq!("YdResponse('hello')",
+    ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
+    /// ```
     fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>>;
 }
 
+/// try and rethrow the possible error in `Box<Error>`
 macro_rules! try_box {
     ($expr:expr) => (match $expr {
         Ok(val) => Ok(val),
@@ -30,7 +40,10 @@ macro_rules! try_box {
     })
 }
 
+/// Implement wrapper client trait on `hypper::Client`
 impl YdClient for Client {
+
+    /// lookup a word on YD and returns a `YdPreponse`
     fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
         let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
         url.set_query_from_pairs(vec!(("keyfrom", API),

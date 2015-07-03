@@ -13,9 +13,9 @@ use libc::funcs::posix88::unistd::isatty;
 use hyper::Client;
 
 
-mod ydresponse;
-mod ydclient;
-mod formatters;
+pub mod ydresponse;
+pub mod ydclient;
+pub mod formatters;
 
 use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};

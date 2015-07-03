@@ -1,7 +1,10 @@
+//! Formatters used by `YdResponse::explain`
+
 use ansi_term::Colour::{Red, Yellow, Purple, Cyan};
 use ansi_term::Style;
 use notify_rust::Notification;
 
+/// Base trait for formatters
 pub trait Formatter {
     fn red       (&self, &str) -> String;
     fn yellow    (&self, &str) -> String;
@@ -13,6 +16,7 @@ pub trait Formatter {
     fn print (&mut self, word: &str, body: &str);
 }
 
+/// Plain text formatter
 pub struct PlainFormatter;
 
 impl Formatter for PlainFormatter {
@@ -27,6 +31,7 @@ impl Formatter for PlainFormatter {
     fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
+/// Ansi escaped colored formatter
 pub struct AnsiFormatter;
 
 impl Formatter for AnsiFormatter {
@@ -45,6 +50,7 @@ impl Formatter for AnsiFormatter {
     }
 }
 
+/// HTML-style formatter, suitable for desktop notification
 pub struct HtmlFormatter{
     notify: bool,
     notifier: Notification,
