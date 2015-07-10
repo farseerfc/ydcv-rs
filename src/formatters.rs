@@ -1,7 +1,5 @@
 //! Formatters used by `YdResponse::explain`
 
-use ansi_term::Colour::{Red, Yellow, Purple, Cyan};
-use ansi_term::Style;
 use notify_rust::Notification;
 
 /// Base trait for formatters
@@ -25,9 +23,7 @@ impl Formatter for PlainFormatter {
     fn yellow    (&self, s: &str) -> String { s.to_string() }
     fn purple    (&self, s: &str) -> String { s.to_string() }
     fn cyan      (&self, s: &str) -> String { s.to_string() }
-
     fn underline (&self, s: &str) -> String { s.to_string() }
-
     fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
@@ -36,18 +32,12 @@ pub struct AnsiFormatter;
 
 impl Formatter for AnsiFormatter {
     fn default   (&self, s: &str) -> String { s.to_string() }
-    fn red       (&self, s: &str) -> String { Red.paint(s).to_string() }
-    fn yellow    (&self, s: &str) -> String { Yellow.paint(s).to_string() }
-    fn purple    (&self, s: &str) -> String { Purple.paint(s).to_string() }
-    fn cyan      (&self, s: &str) -> String { Cyan.paint(s).to_string() }
-
-    fn underline (&self, s: &str) -> String {
-        Style::default().underline().paint(s).to_string()
-    }
-
-    fn print (&mut self, _: &str, body: &str) {
-        println!("{}", body);
-    }
+    fn red       (&self, s: &str) -> String { format!("\x1b[31m{}\x1b[0m", s) }
+    fn yellow    (&self, s: &str) -> String { format!("\x1b[33m{}\x1b[0m", s) }
+    fn purple    (&self, s: &str) -> String { format!("\x1b[35m{}\x1b[0m", s) }
+    fn cyan      (&self, s: &str) -> String { format!("\x1b[36m{}\x1b[0m", s) }
+    fn underline (&self, s: &str) -> String { format!("\x1b[4m{}\x1b[0m", s) }
+    fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
 /// HTML-style formatter, suitable for desktop notification
