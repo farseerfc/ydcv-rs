@@ -2,6 +2,12 @@
 
 use notify_rust::Notification;
 
+macro_rules! def {
+    ($($n:ident),*) => { $(
+        fn $n (&self, s: &str) -> String;
+    )* }
+}
+
 /// Base trait for formatters
 pub trait Formatter {
     fn red       (&self, &str) -> String;
@@ -17,26 +23,31 @@ pub trait Formatter {
 /// Plain text formatter
 pub struct PlainFormatter;
 
+macro_rules! plain {
+    ($($n:ident),*) => { $(
+        fn $n (&self, s: &str) -> String { s.to_string() }
+    )* }
+}
+
 impl Formatter for PlainFormatter {
-    fn default   (&self, s: &str) -> String { s.to_string() }
-    fn red       (&self, s: &str) -> String { s.to_string() }
-    fn yellow    (&self, s: &str) -> String { s.to_string() }
-    fn purple    (&self, s: &str) -> String { s.to_string() }
-    fn cyan      (&self, s: &str) -> String { s.to_string() }
-    fn underline (&self, s: &str) -> String { s.to_string() }
+    plain!(default, red, yellow, purple, cyan, underline);
     fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
 /// Ansi escaped colored formatter
 pub struct AnsiFormatter;
 
+macro_rules! ansi {
+    ($( $n:ident = $x:expr ),*) => { $(
+        fn $n (&self, s: &str) -> String {
+            format!("\x1b[{}m{}\x1b[0m", $x, s)
+        }
+    )* }
+}
+
 impl Formatter for AnsiFormatter {
+    ansi!(red=31, yellow=33, purple=35, cyan=36, underline=4);
     fn default   (&self, s: &str) -> String { s.to_string() }
-    fn red       (&self, s: &str) -> String { format!("\x1b[31m{}\x1b[0m", s) }
-    fn yellow    (&self, s: &str) -> String { format!("\x1b[33m{}\x1b[0m", s) }
-    fn purple    (&self, s: &str) -> String { format!("\x1b[35m{}\x1b[0m", s) }
-    fn cyan      (&self, s: &str) -> String { format!("\x1b[36m{}\x1b[0m", s) }
-    fn underline (&self, s: &str) -> String { format!("\x1b[4m{}\x1b[0m", s) }
     fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 
@@ -55,11 +66,16 @@ impl HtmlFormatter{
     }
 }
 
+macro_rules! html {
+    ($( $n:ident = $x:expr ),*) => { $(
+        fn $n (&self, s: &str) -> String {
+            format!(r#"<span color="{}">{}</span>"#, $x, s)
+        }
+    )* }
+}
+
 impl Formatter for HtmlFormatter {
-    fn red       (&self, s: &str) -> String { format!(r#"<span color="red">{}</span>"#, s) }
-    fn yellow    (&self, s: &str) -> String { format!(r#"<span color="goldenrod">{}</span>"#, s) }
-    fn purple    (&self, s: &str) -> String { format!(r#"<span color="purple">{}</span>"#, s) }
-    fn cyan      (&self, s: &str) -> String { format!(r#"<span color="navy">{}</span>"#, s) }
+    html!(red="red", yellow="goldenrod", purple="purple", cyan="navy");
     fn underline (&self, s: &str) -> String { format!(r#"<u>{}</u>"#, s) }
     fn default   (&self, s: &str) -> String { format!(r#"{}"#, s) }
 
