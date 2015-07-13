@@ -1,6 +1,6 @@
 [root]
 name = "ydcv-rs"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "clippy 0.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "curl 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",

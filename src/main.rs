@@ -9,15 +9,17 @@ extern crate log;
 extern crate env_logger;
 extern crate getopts;
 extern crate readline;
-extern crate notify_rust;
 extern crate libc;
+extern crate url;
+
+#[cfg(feature="notify_rust")]
+extern crate notify_rust;
 
 #[cfg(feature="hyper")]
 extern crate hyper;
 
 #[cfg(feature="curl")]
 extern crate curl;
-extern crate url;
 
 use libc::funcs::posix88::unistd::isatty;
 
