@@ -25,7 +25,7 @@ pub struct PlainFormatter;
 
 macro_rules! plain {
     ($($n:ident),*) => { $(
-        fn $n (&self, s: &str) -> String { s.to_string() }
+        fn $n (&self, s: &str) -> String { s.to_owned() }
     )* }
 }
 
@@ -47,7 +47,7 @@ macro_rules! ansi {
 
 impl Formatter for AnsiFormatter {
     ansi!(red=31, yellow=33, purple=35, cyan=36, underline=4);
-    fn default   (&self, s: &str) -> String { s.to_string() }
+    fn default   (&self, s: &str) -> String { s.to_owned() }
     fn print (&mut self, _: &str, body: &str) { println!("{}", body); }
 }
 

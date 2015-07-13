@@ -2,7 +2,6 @@
 #![plugin(clippy)]
 
 //! main module of ydcv-rs
-
 extern crate rustc_serialize;
 
 #[macro_use]
@@ -64,7 +63,7 @@ fn get_clipboard() -> String {
             return result;
         }
     }
-    return "".to_string();
+    return "".to_owned();
 }
 
 
@@ -82,7 +81,7 @@ fn main() {
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
-        Err(f) => panic!(f.to_string())
+        Err(f) => panic!(f.to_owned())
     };
 
     if matches.opt_present("h") {
@@ -100,25 +99,22 @@ fn main() {
     let fmt :&mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
         &mut html
     }else{
-        match matches.opt_str("c") {
-            Some(c) => if c == "always" || unsafe{ isatty(1) == 1} && c != "never" {
-                    &mut ansi
-                } else {
-                    &mut plain
-                },
-            _ => if unsafe{ isatty(1) == 1 } {
-                    &mut ansi
-                } else {
-                    &mut plain
-                }
+        if let Some(c) = matches.opt_str("c") {
+            if c == "always" || unsafe{ isatty(1) == 1} && c != "never" {
+                &mut ansi
+            } else {
+                &mut plain
+            }
+        }else{ 
+            if unsafe{ isatty(1) == 1 } {
+                &mut ansi
+            } else {
+                &mut plain
+            }
         }
     };
 
-    if matches.free.len() > 0 {
-        for word in matches.free {
-            lookup_explain(&mut client, &word, fmt);
-        }
-    } else {
+    if matches.free.is_empty() {
         if matches.opt_present("x") {
             let mut last = get_clipboard();
             println!("Waiting for selection> ");
@@ -127,7 +123,7 @@ fn main() {
                 let curr = get_clipboard();
                 if curr != last {
                     last = curr.clone();
-                    if last.len() > 0 {
+                    if !last.is_empty() {
                         lookup_explain(&mut client, &curr, fmt);
                         println!("Waiting for selection> ");
                     }
@@ -139,6 +135,10 @@ fn main() {
                 let word = String::from_utf8_lossy(&result.to_bytes());
                 lookup_explain(&mut client, &word, fmt);
             }
+        }
+    } else {
+        for word in matches.free {
+            lookup_explain(&mut client, &word, fmt);
         }
     }
     return;

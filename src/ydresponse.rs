@@ -44,22 +44,23 @@ impl YdResponse {
         if self.basic.is_none() && self.web.is_none(){
             result.push(fmt.underline(&self.query));
             result.push(fmt.cyan("  Translation:"));
-            result.push("    ".to_string() + &self.translation.as_ref().unwrap().connect("；"));
+            result.push("    ".to_owned() + &self.translation.as_ref().unwrap().connect("；"));
             return result.connect("\n");
         }
 
-        let phonetic = match self.basic {
-            Some(ref basic) => match (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
+        let phonetic = if let Some(ref basic) = self.basic {
+            match (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
                 (Some(us_phonetic), Some(uk_phonetic)) =>
                     format!(" UK: [{}], US: [{}]",
                         fmt.yellow(uk_phonetic),
                         fmt.yellow(us_phonetic)),
                 _ => match basic.phonetic {
                         Some(ref phonetic) => format!("[{}]", fmt.yellow(&phonetic)) ,
-                        _ => "".to_string()
+                        _ => "".to_owned()
                     }
-            },
-            _ => "".to_string()
+            }
+        }else{
+            "".to_owned()
         };
 
         result.push(format!("{} {} {}",
@@ -68,30 +69,26 @@ impl YdResponse {
             fmt.default(&self.translation.as_ref().unwrap().connect("；"))
             ));
 
-        match self.basic {
-            Some(ref basic) => if basic.explains.len() > 0 {
+        if let Some(ref basic) = self.basic {
+            if !basic.explains.is_empty() {
                 result.push(fmt.cyan("  Word Explanation:"));
                 for exp in &basic.explains {
-                    result.push("     * ".to_string() + &exp);
+                    result.push("     * ".to_owned() + &exp);
                 }
-            },
-            _ => ()
+            }
         }
 
-        match self.web {
-            Some(ref web) => {
-                if web.len() > 0{
-                    result.push(fmt.cyan("  Web Reference:"));
-                    for item in web {
-                        result.push("     * ".to_string() + &fmt.yellow(&item.key));
-                        result.push("       ".to_string() + &item.value.iter()
-                            .map(|x| fmt.purple(x))
-                            .collect::<Vec<_>>()
-                            .connect("；"));
-                    }
+        if let Some(ref web) = self.web {
+            if !web.is_empty() {
+                result.push(fmt.cyan("  Web Reference:"));
+                for item in web {
+                    result.push("     * ".to_owned() + &fmt.yellow(&item.key));
+                    result.push("       ".to_owned() + &item.value.iter()
+                        .map(|x| fmt.purple(x))
+                        .collect::<Vec<_>>()
+                        .connect("；"));
                 }
-            },
-            _ => ()
+            }
         }
 
         result.connect("\n")
