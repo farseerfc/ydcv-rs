@@ -1,6 +1,3 @@
-#![feature(plugin)]
-#![plugin(clippy)]
-
 //! main module of ydcv-rs
 extern crate rustc_serialize;
 
