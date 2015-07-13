@@ -1,5 +1,7 @@
+//! main module of ydcv-rs
+
 extern crate rustc_serialize;
-extern crate hyper;
+
 #[macro_use]
 extern crate log;
 extern crate env_logger;
@@ -8,8 +10,17 @@ extern crate readline;
 extern crate notify_rust;
 extern crate libc;
 
+#[cfg(feature="hyper")]
+extern crate hyper;
+
+#[cfg(feature="curl")]
+extern crate curl;
+extern crate url;
+
 use libc::funcs::posix88::unistd::isatty;
-use hyper::Client;
+
+#[cfg(feature="hyper")]
+pub use hyper::Client;
 
 
 pub mod ydresponse;
@@ -18,6 +29,20 @@ pub mod formatters;
 
 use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
+
+#[cfg(feature="curl")]
+pub struct Client{
+    handle: curl::http::Handle
+}
+
+#[cfg(feature="curl")]
+impl Client {
+    fn new() -> Client{
+        Client{
+            handle: curl::http::handle()
+        }
+    }
+}
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter){
     match client.lookup_word(word){
@@ -38,6 +63,7 @@ fn get_clipboard() -> String {
     }
     return "".to_string();
 }
+
 
 #[allow(dead_code)]
 fn main() {

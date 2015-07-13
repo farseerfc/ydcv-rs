@@ -97,7 +97,7 @@ impl Formatter for HtmlFormatter {
 #[cfg(test)]
 mod tests {
     use ::ydclient::*;
-    use hyper::Client;
+    use ::Client;
     use ::super::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
     #[test]

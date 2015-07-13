@@ -1,13 +1,12 @@
 //! ydclient is client wrapper for Client
 
-use std::io::Read;
 use std::error::Error;
 
 use rustc_serialize::json;
 use rustc_serialize::json::Json;
 
-use hyper::Client;
-use hyper::Url;
+use ::Client;
+use url::Url;
 
 use super::ydresponse::YdResponse;
 
@@ -43,8 +42,11 @@ macro_rules! try_box {
 /// Implement wrapper client trait on `hypper::Client`
 impl YdClient for Client {
 
+    #[cfg(feature="use_hyper")]
     /// lookup a word on YD and returns a `YdPreponse`
     fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
+        use std::io::Read;
+
         let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
         url.set_query_from_pairs(vec!(("keyfrom", API),
             ("key", API_KEY), ("type", "data"), ("doctype", "json"),
@@ -60,12 +62,30 @@ impl YdClient for Client {
 
         try_box!(json::decode::<YdResponse>(&body))
     }
+
+    #[cfg(feature="use_curl")]
+    /// lookup a word on YD and returns a `YdPreponse`
+    fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
+        let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
+        url.set_query_from_pairs(vec!(("keyfrom", API),
+            ("key", API_KEY), ("type", "data"), ("doctype", "json"),
+            ("version", "1.1"), ("q", word)).into_iter());
+
+        let resp = self.handle
+                .get(url.serialize())
+                .exec().unwrap();
+        let body = String::from_utf8_lossy(resp.get_body());
+
+        debug!("Recieved JSON {}", Json::from_str(&body).unwrap().pretty());
+
+        try_box!(json::decode::<YdResponse>(&body))
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hyper::Client;
+    use ::Client;
 
     #[test]
     fn test_lookup_word_0(){
