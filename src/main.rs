@@ -12,7 +12,7 @@ extern crate readline;
 extern crate libc;
 extern crate url;
 
-#[cfg(feature="notify_rust")]
+#[cfg(feature="notify-rust")]
 extern crate notify_rust;
 
 #[cfg(feature="hyper")]

@@ -1,5 +1,5 @@
 language: rust
-rust: nightly
+rust: beta
 
 script:
     - cargo test --verbose --no-default-features --features "curl"

@@ -1,5 +1,8 @@
 //! Formatters used by `YdResponse::explain`
 
+#[cfg(feature="notify-rust")]
+use notify_rust::Notification;
+
 macro_rules! def {
     ($($n:ident),*) => { $(
         fn $n (&self, s: &str) -> String;
@@ -53,20 +56,20 @@ impl Formatter for AnsiFormatter {
 /// HTML-style formatter, suitable for desktop notification
 pub struct HtmlFormatter{
     notify: bool,
-    #[cfg(feature="notify_rust")]
-    notifier: notify_rust::Notification,
+    #[cfg(feature="notify-rust")]
+    notifier: Notification,
 }
 
 impl HtmlFormatter{
-    #[cfg(feature="notify_rust")]
+    #[cfg(feature="notify-rust")]
     pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter{
             notify: notify,
-            notifier: notify_rust::Notification::new()
+            notifier: Notification::new()
         }
     }
 
-    #[cfg(not(feature="notify_rust"))]
+    #[cfg(not(feature="notify-rust"))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter{
             notify: false,
@@ -87,7 +90,7 @@ impl Formatter for HtmlFormatter {
     fn underline (&self, s: &str) -> String { format!(r#"<u>{}</u>"#, s) }
     fn default   (&self, s: &str) -> String { format!(r#"{}"#, s) }
 
-    #[cfg(feature="notify_rust")]
+    #[cfg(feature="notify-rust")]
     fn print (&mut self, word: &str, body: &str) {
         if self.notify {
             self.notifier
@@ -101,7 +104,7 @@ impl Formatter for HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature="notify_rust"))]
+    #[cfg(not(feature="notify-rust"))]
     fn print (&mut self, word: &str, body: &str) {
         println!("{}", body);
     }
