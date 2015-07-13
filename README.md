@@ -15,7 +15,7 @@ cargo build
 
 To use `hyper`, which will have 36 dependencies, build with:
 ```bash
-cargo build --no-default-features --features "use_hyper"
+cargo build --no-default-features --features "hyper"
 ```
 
 # (Original) YouDao Console Version

@@ -12,6 +12,7 @@ readline = "*"
 notify-rust = "*"
 libc = "*"
 url = "*"
+clippy = "*"
 
 [dependencies.curl]
 version = "*"
@@ -22,6 +23,4 @@ version = "*"
 optional = true
 
 [features]
-default = ["use_curl"]
-use_curl = ["curl"]
-use_hyper = ["hyper"]
+default = ["curl"]

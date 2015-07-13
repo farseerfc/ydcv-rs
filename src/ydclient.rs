@@ -42,7 +42,7 @@ macro_rules! try_box {
 /// Implement wrapper client trait on `hypper::Client`
 impl YdClient for Client {
 
-    #[cfg(feature="use_hyper")]
+    #[cfg(feature="hyper")]
     /// lookup a word on YD and returns a `YdPreponse`
     fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
         use std::io::Read;
@@ -63,7 +63,7 @@ impl YdClient for Client {
         try_box!(json::decode::<YdResponse>(&body))
     }
 
-    #[cfg(feature="use_curl")]
+    #[cfg(feature="curl")]
     /// lookup a word on YD and returns a `YdPreponse`
     fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
         let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
