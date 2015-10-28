@@ -38,14 +38,14 @@ impl YdResponse {
         if self.errorCode != 0 || 
             self.basic.is_none() && self.web.is_none() && self.translation.is_none(){
             result.push(fmt.red(" -- No result for this query."));
-            return result.connect("\n");
+            return result.join("\n");
         }
 
         if self.basic.is_none() && self.web.is_none(){
             result.push(fmt.underline(&self.query));
             result.push(fmt.cyan("  Translation:"));
-            result.push("    ".to_owned() + &self.translation.as_ref().unwrap().connect("；"));
-            return result.connect("\n");
+            result.push("    ".to_owned() + &self.translation.as_ref().unwrap().join("；"));
+            return result.join("\n");
         }
 
         let phonetic = if let Some(ref basic) = self.basic {
@@ -66,7 +66,7 @@ impl YdResponse {
         result.push(format!("{} {} {}",
             fmt.underline(&self.query),
             phonetic,
-            fmt.default(&self.translation.as_ref().unwrap().connect("；"))
+            fmt.default(&self.translation.as_ref().unwrap().join("；"))
             ));
 
         if let Some(ref basic) = self.basic {
@@ -86,12 +86,12 @@ impl YdResponse {
                     result.push("       ".to_owned() + &item.value.iter()
                         .map(|x| fmt.purple(x))
                         .collect::<Vec<_>>()
-                        .connect("；"));
+                        .join("；"));
                 }
             }
         }
 
-        result.connect("\n")
+        result.join("\n")
     }
 }
 

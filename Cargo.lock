@@ -1,6 +1,6 @@
 [root]
 name = "ydcv-rs"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "curl 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
