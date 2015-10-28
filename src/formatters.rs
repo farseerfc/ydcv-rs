@@ -98,7 +98,7 @@ impl Formatter for HtmlFormatter {
                 .summary(word)
                 .body(body)
                 .timeout(30000)
-                .update();
+                .show().unwrap();
         }else{
             println!("{}", body);
         }
