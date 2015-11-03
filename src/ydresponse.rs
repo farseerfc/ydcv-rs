@@ -49,15 +49,12 @@ impl YdResponse {
         }
 
         let phonetic = if let Some(ref basic) = self.basic {
-            match (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
-                (Some(us_phonetic), Some(uk_phonetic)) =>
-                    format!(" UK: [{}], US: [{}]",
-                        fmt.yellow(uk_phonetic),
-                        fmt.yellow(us_phonetic)),
-                _ => match basic.phonetic {
-                        Some(ref phonetic) => format!("[{}]", fmt.yellow(&phonetic)) ,
-                        _ => "".to_owned()
-                    }
+            if let (Some(us_phonetic), Some(uk_phonetic)) = (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
+                format!(" UK: [{}], US: [{}]", fmt.yellow(uk_phonetic), fmt.yellow(us_phonetic))
+            } else if let Some(ref phonetic) = basic.phonetic {
+                format!("[{}]", fmt.yellow(&phonetic))
+            } else {
+                "".to_owned()
             }
         }else{
             "".to_owned()
