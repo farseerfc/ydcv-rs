@@ -28,7 +28,8 @@ pub trait YdClient{
     /// assert_eq!("YdResponse('hello')",
     ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
     /// ```
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>>;
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>>;
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse, Box<Error>>;
 }
 
 /// try and rethrow the possible error in `Box<Error>`
@@ -42,9 +43,14 @@ macro_rules! try_box {
 /// Implement wrapper client trait on `hypper::Client`
 impl YdClient for Client {
 
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse, Box<Error>> {
+        debug!("Recieved JSON {}", Json::from_str(&result).unwrap().pretty());
+        try_box!(json::decode::<YdResponse>(&result))
+    }
+
     #[cfg(feature="hyper")]
     /// lookup a word on YD and returns a `YdPreponse`
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
         use std::io::Read;
 
         let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
@@ -58,14 +64,17 @@ impl YdClient for Client {
             try!(self.get(&url.serialize()).send())
             .read_to_string(&mut body));
         
-        debug!("Recieved JSON {}", Json::from_str(&body).unwrap().pretty());
-
-        try_box!(json::decode::<YdResponse>(&body))
+        let raw_result = YdResponse::new_raw(body.into_owned());
+        if raw {
+            Ok(raw_result)
+        }else{
+            self.decode_result(&raw_result.raw_result())
+        }
     }
 
     #[cfg(feature="curl")]
     /// lookup a word on YD and returns a `YdPreponse`
-    fn lookup_word(&mut self, word: &str) -> Result<YdResponse, Box<Error>> {
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
         let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
         url.set_query_from_pairs(vec!(("keyfrom", API),
             ("key", API_KEY), ("type", "data"), ("doctype", "json"),
@@ -74,11 +83,14 @@ impl YdClient for Client {
         let resp = self.handle
                 .get(url.serialize())
                 .exec().unwrap();
-        let body = String::from_utf8_lossy(resp.get_body());
-
-        debug!("Recieved JSON {}", Json::from_str(&body).unwrap().pretty());
-
-        try_box!(json::decode::<YdResponse>(&body))
+        let body = String::from_utf8_lossy(resp.get_body()).clone();
+        
+        let raw_result = YdResponse::new_raw(body.into_owned());
+        if raw {
+            Ok(raw_result)
+        }else{
+            self.decode_result(&raw_result.raw_result())
+        }
     }
 }
 
@@ -90,18 +102,18 @@ mod tests {
     #[test]
     fn test_lookup_word_0(){
         assert_eq!("YdResponse('hello')",
-            format!("{}", Client::new().lookup_word("hello").unwrap()));
+            format!("{}", Client::new().lookup_word("hello", false).unwrap()));
     }
 
     #[test]
     fn test_lookup_word_1(){
         assert_eq!("YdResponse('world')",
-            format!("{}", Client::new().lookup_word("world").unwrap()));
+            format!("{}", Client::new().lookup_word("world", false).unwrap()));
     }
 
     #[test]
     fn test_lookup_word_2(){
         assert_eq!("YdResponse('<+*>?_')",
-            format!("{}", Client::new().lookup_word("<+*>?_").unwrap()));
+            format!("{}", Client::new().lookup_word("<+*>?_", false).unwrap()));
     }
 }

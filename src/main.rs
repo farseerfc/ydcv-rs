@@ -45,14 +45,18 @@ impl Client {
     }
 }
 
-fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter){
-    match client.lookup_word(word){
-        Ok(ref result) => {
-            let exp = result.explain(fmt);
-            fmt.print(word, &exp);
+fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool){
+    if raw {
+        println!("{}", client.lookup_word(word, true).unwrap().raw_result());
+    }else{
+        match client.lookup_word(word, false){
+            Ok(ref result) => {
+                let exp = result.explain(fmt);
+                fmt.print(word, &exp);
+            }
+            Err(err) => fmt.print(word,
+                &format!("Error looking-up word {}: {:?}", word, err))
         }
-        Err(err) => fmt.print(word,
-            &format!("Error looking-up word {}: {:?}", word, err))
     }
 }
 
@@ -76,6 +80,7 @@ fn main() {
     opts.optflag("x", "selection", "show explaination of current selection");
     opts.optflag("H", "html", "HTML-style output");
     opts.optflag("n", "notify", "send desktop notifications (implies -H)");
+    opts.optflag("r", "raw", "dump raw json reply from server");
     opts.optopt("c", "color", "[auto, always, never] use color", "auto");
 
     let matches = match opts.parse(&args[1..]){
@@ -113,6 +118,8 @@ fn main() {
         }
     };
 
+    let raw = matches.opt_present("r");
+
     if matches.free.is_empty() {
         if matches.opt_present("x") {
             let mut last = get_clipboard();
@@ -123,7 +130,7 @@ fn main() {
                 if curr != last {
                     last = curr.clone();
                     if !last.is_empty() {
-                        lookup_explain(&mut client, &curr, fmt);
+                        lookup_explain(&mut client, &curr, fmt, raw);
                         println!("Waiting for selection> ");
                     }
                 }
@@ -132,12 +139,12 @@ fn main() {
             let prompt = std::ffi::CString::new("> ").unwrap();
             while let Ok(result) = readline::readline(&prompt) {
                 let word = String::from_utf8_lossy(&result.to_bytes());
-                lookup_explain(&mut client, &word, fmt);
+                lookup_explain(&mut client, &word, fmt, raw);
             }
         }
     } else {
         for word in matches.free {
-            lookup_explain(&mut client, &word, fmt);
+            lookup_explain(&mut client, &word, fmt, raw);
         }
     }
     return;

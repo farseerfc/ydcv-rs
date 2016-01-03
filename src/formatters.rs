@@ -117,66 +117,79 @@ mod tests {
     use ::Client;
     use ::super::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
+    static RAW_FELIX: &'static str = r#"
+    {
+        "translation":["费利克斯"],
+        "basic":{
+            "us-phonetic":"'fi:liks",
+            "phonetic":"'fi:liks",
+            "uk-phonetic":"'fi:liks",
+            "explains":["n. 菲力克斯（男子名）；费力克斯制导炸弹"]
+        },
+        "query":"Felix",
+        "errorCode":0,
+        "web":[
+            {"value":["费利克斯","费利斯","菲力克斯"],"key":"Felix"},
+            {"value":["菲利克斯·马加特","马加特","菲利斯·马加夫"],"key":"Felix Magath"},
+            {"value":["费利克斯·布洛赫","布洛赫","傅里克"],"key":"Felix Bloch"}
+        ]
+    }"#;
+
+
     #[test]
     fn test_explain_ansi(){
         assert_eq!("
-\x1b[4mhello\x1b[0m [\x1b[33mhə'ləʊ; he-\x1b[0m] 你好
+\x1b[4mFelix\x1b[0m [\x1b[33m'fi:liks\x1b[0m] 费利克斯
 \x1b[36m  Word Explanation:\x1b[0m
-     * n. 表示问候， 惊奇或唤起注意时的用语
-     * int. 喂；哈罗
-     * n. (Hello)人名；(法)埃洛
+     * n. 菲力克斯（男子名）；费力克斯制导炸弹
 \x1b[36m  Web Reference:\x1b[0m
-     * \x1b[33mHello\x1b[0m
-       \x1b[35m你好\x1b[0m；\x1b[35m您好\x1b[0m；\x1b[35m哈啰\x1b[0m
-     * \x1b[33mHello Kitty\x1b[0m
-       \x1b[35m凯蒂猫\x1b[0m；\x1b[35m昵称\x1b[0m；\x1b[35m匿称\x1b[0m
-     * \x1b[33mhello bebe\x1b[0m
-       \x1b[35m哈乐哈乐\x1b[0m；\x1b[35m乐扣乐扣\x1b[0m
+     * \x1b[33mFelix\x1b[0m
+       \x1b[35m费利克斯\x1b[0m；\x1b[35m费利斯\x1b[0m；\x1b[35m菲力克斯\x1b[0m
+     * \x1b[33mFelix Magath\x1b[0m
+       \x1b[35m菲利克斯·马加特\x1b[0m；\x1b[35m马加特\x1b[0m；\x1b[35m菲利斯·马加夫\x1b[0m
+     * \x1b[33mFelix Bloch\x1b[0m
+       \x1b[35m费利克斯·布洛赫\x1b[0m；\x1b[35m布洛赫\x1b[0m；\x1b[35m傅里克\x1b[0m
 ",format!("\n{}\n",
     Client::new()
-        .lookup_word("hello").unwrap()
+        .decode_result(RAW_FELIX).unwrap()
         .explain(&AnsiFormatter)));
     }
 
     #[test]
     fn test_explain_plain(){
         assert_eq!("
-hello [hə'ləʊ; he-] 你好
+Felix ['fi:liks] 费利克斯
   Word Explanation:
-     * n. 表示问候， 惊奇或唤起注意时的用语
-     * int. 喂；哈罗
-     * n. (Hello)人名；(法)埃洛
+     * n. 菲力克斯（男子名）；费力克斯制导炸弹
   Web Reference:
-     * Hello
-       你好；您好；哈啰
-     * Hello Kitty
-       凯蒂猫；昵称；匿称
-     * hello bebe
-       哈乐哈乐；乐扣乐扣
+     * Felix
+       费利克斯；费利斯；菲力克斯
+     * Felix Magath
+       菲利克斯·马加特；马加特；菲利斯·马加夫
+     * Felix Bloch
+       费利克斯·布洛赫；布洛赫；傅里克
 ",format!("\n{}\n",
     Client::new()
-        .lookup_word("hello").unwrap()
+        .decode_result(RAW_FELIX).unwrap()
         .explain(&PlainFormatter)));
     }
 
     #[test]
     fn test_explain_html_0(){
         assert_eq!(r#"
-<u>hello</u> [<span color="goldenrod">hə'ləʊ; he-</span>] 你好
+<u>Felix</u> [<span color="goldenrod">'fi:liks</span>] 费利克斯
 <span color="navy">  Word Explanation:</span>
-     * n. 表示问候， 惊奇或唤起注意时的用语
-     * int. 喂；哈罗
-     * n. (Hello)人名；(法)埃洛
+     * n. 菲力克斯（男子名）；费力克斯制导炸弹
 <span color="navy">  Web Reference:</span>
-     * <span color="goldenrod">Hello</span>
-       <span color="purple">你好</span>；<span color="purple">您好</span>；<span color="purple">哈啰</span>
-     * <span color="goldenrod">Hello Kitty</span>
-       <span color="purple">凯蒂猫</span>；<span color="purple">昵称</span>；<span color="purple">匿称</span>
-     * <span color="goldenrod">hello bebe</span>
-       <span color="purple">哈乐哈乐</span>；<span color="purple">乐扣乐扣</span>
+     * <span color="goldenrod">Felix</span>
+       <span color="purple">费利克斯</span>；<span color="purple">费利斯</span>；<span color="purple">菲力克斯</span>
+     * <span color="goldenrod">Felix Magath</span>
+       <span color="purple">菲利克斯·马加特</span>；<span color="purple">马加特</span>；<span color="purple">菲利斯·马加夫</span>
+     * <span color="goldenrod">Felix Bloch</span>
+       <span color="purple">费利克斯·布洛赫</span>；<span color="purple">布洛赫</span>；<span color="purple">傅里克</span>
 "#,format!("\n{}\n",
     Client::new()
-        .lookup_word("hello").unwrap()
+        .decode_result(RAW_FELIX).unwrap()
         .explain(&HtmlFormatter::new(false))));
     }
 
@@ -188,7 +201,7 @@ hello [hə'ləʊ; he-] 你好
     asdakda
 "#,format!("\n{}\n",
     Client::new()
-        .lookup_word("asdakda").unwrap()
+        .lookup_word("asdakda", false).unwrap()
         .explain(&HtmlFormatter::new(false))));
     }
 

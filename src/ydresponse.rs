@@ -31,6 +31,20 @@ pub struct YdResponse{
 
 
 impl YdResponse {
+    pub fn new_raw(result: String) -> YdResponse{
+         YdResponse{
+            query: result,
+            errorCode: 0,
+            basic: None,
+            translation: None,
+            web: None
+        }
+    }
+
+    pub fn raw_result(&self) -> String {
+        self.query.clone()
+    }
+
     /// Explain the result in text format using a formatter
     pub fn explain(&self, fmt: &Formatter) -> String {
         let mut result: Vec<String> = vec!();
