@@ -1,7 +1,7 @@
 [package]
 name = "ydcv-rs"
-version = "0.2.5"
-authors = ["Jiachen Yang <jc-yang@ist.osaka-u.ac.jp>"]
+version = "0.3.0"
+authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
 rustc-serialize = "*"
