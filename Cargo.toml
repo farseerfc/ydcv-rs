@@ -1,27 +1,31 @@
 [package]
 name = "ydcv-rs"
-version = "0.3.0"
+description = "A rust version of YouDao Console Version"
+repository = "https://github.com/farseerfc/ydcv-rs"
+readme = "README.md"
+license = "GPL-2.0"
+version = "0.3.1"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
-rustc-serialize = "*"
-log = "*"
-env_logger = "*"
-getopts = "*"
-readline = "*"
-libc = "*"
-url = "*"
+rustc-serialize = "0.3.16"
+log = "0.3.4"
+env_logger = "0.3.2"
+getopts = "0.2.14"
+readline = "0.0.11"
+libc = "0.2.4"
+url = "0.5.2"
 
 [dependencies.notify-rust]
-version = "*"
+version = "3.0.3"
 optional = true
 
 [dependencies.curl]
-version = "*"
+version = "0.2.15"
 optional = true
 
 [dependencies.hyper]
-version = "*"
+version = "0.7.1"
 optional = true
 
 [features]
