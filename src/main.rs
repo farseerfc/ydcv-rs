@@ -18,7 +18,7 @@ extern crate hyper;
 #[cfg(feature="curl")]
 extern crate curl;
 
-use libc::funcs::posix88::unistd::isatty;
+use libc::isatty;
 
 #[cfg(feature="hyper")]
 pub use hyper::Client;
@@ -51,7 +51,7 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter){
             let exp = result.explain(fmt);
             fmt.print(word, &exp);
         }
-        Err(err) => fmt.print(word, 
+        Err(err) => fmt.print(word,
             &format!("Error looking-up word {}: {:?}", word, err))
     }
 }
@@ -99,12 +99,12 @@ fn main() {
         &mut html
     }else{
         if let Some(c) = matches.opt_str("c") {
-            if c == "always" || unsafe{ isatty(1) == 1} && c != "never" {
+            if c == "always" || unsafe{ isatty(1) == 1 } && c != "never" {
                 &mut ansi
             } else {
                 &mut plain
             }
-        }else{ 
+        }else{
             if unsafe{ isatty(1) == 1 } {
                 &mut ansi
             } else {
@@ -118,7 +118,7 @@ fn main() {
             let mut last = get_clipboard();
             println!("Waiting for selection> ");
             loop {
-                std::thread::sleep_ms(100);
+                std::thread::sleep(std::time::Duration::from_millis(100));
                 let curr = get_clipboard();
                 if curr != last {
                     last = curr.clone();
