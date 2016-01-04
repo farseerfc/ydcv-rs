@@ -20,7 +20,7 @@ const API_KEY: &'static str = "659600698";
 pub trait YdClient{
     /// lookup a word on YD and returns a `YdPreponse`
     ///
-    /// # Examples 
+    /// # Examples
     ///
     /// lookup "hello" and compare the result:
     ///
@@ -63,8 +63,8 @@ impl YdClient for Client {
         try!(
             try!(self.get(&url.serialize()).send())
             .read_to_string(&mut body));
-        
-        let raw_result = YdResponse::new_raw(body.into_owned());
+
+        let raw_result = YdResponse::new_raw(body);
         if raw {
             Ok(raw_result)
         }else{
@@ -84,7 +84,7 @@ impl YdClient for Client {
                 .get(url.serialize())
                 .exec().unwrap();
         let body = String::from_utf8_lossy(resp.get_body()).clone();
-        
+
         let raw_result = YdResponse::new_raw(body.into_owned());
         if raw {
             Ok(raw_result)
