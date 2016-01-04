@@ -4,6 +4,7 @@ use std::error::Error;
 
 use rustc_serialize::json;
 use rustc_serialize::json::Json;
+#[cfg(feature="hyper")]
 use hyper::header::Connection;
 
 use ::Client;
