@@ -4,6 +4,8 @@ use std::error::Error;
 
 use rustc_serialize::json;
 use rustc_serialize::json::Json;
+#[cfg(feature="hyper")]
+use hyper::header::Connection;
 
 use ::Client;
 use url::Url;
@@ -16,7 +18,7 @@ const API: &'static str = "YouDaoCV";
 /// API key from ydcv
 const API_KEY: &'static str = "659600698";
 
-/// Wrapper trait on `hypper::Client`
+/// Wrapper trait on `hyper::Client`
 pub trait YdClient{
     /// lookup a word on YD and returns a `YdPreponse`
     ///
@@ -40,7 +42,7 @@ macro_rules! try_box {
     })
 }
 
-/// Implement wrapper client trait on `hypper::Client`
+/// Implement wrapper client trait on `hyper::Client`
 impl YdClient for Client {
 
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, Box<Error>> {
@@ -61,7 +63,7 @@ impl YdClient for Client {
         let mut body = String::new();
 
         try!(
-            try!(self.get(&url.serialize()).send())
+            try!(self.get(&url.serialize()).header(Connection::close()).send())
             .read_to_string(&mut body));
 
         let raw_result = YdResponse::new_raw(body);
@@ -84,7 +86,6 @@ impl YdClient for Client {
                 .get(url.serialize())
                 .exec().unwrap();
         let body = String::from_utf8_lossy(resp.get_body()).clone();
-
         let raw_result = YdResponse::new_raw(body.into_owned());
         if raw {
             Ok(raw_result)
