@@ -2,4 +2,4 @@ language: rust
 
 script:
     - cargo test --verbose --no-default-features --features "curl"
-    # - cargo test --verbose --no-default-features --features "hyper"
+    - cargo test --verbose --no-default-features --features "hyper"
