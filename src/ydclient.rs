@@ -85,7 +85,7 @@ impl YdClient for Client {
                 .exec().unwrap();
         let body = String::from_utf8_lossy(resp.get_body()).clone();
 
-        let raw_result = YdResponse::new_raw(body);
+        let raw_result = YdResponse::new_raw(body.into_owned());
         if raw {
             Ok(raw_result)
         }else{
