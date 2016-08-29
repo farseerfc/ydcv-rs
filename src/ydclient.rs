@@ -12,11 +12,11 @@ use url::Url;
 
 use super::ydresponse::YdResponse;
 
-/// API name from ydcv
-const API: &'static str = "YouDaoCV";
+/// API name
+const API: &'static str = "ydcv-rs";
 
-/// API key from ydcv
-const API_KEY: &'static str = "659600698";
+/// API key
+const API_KEY: &'static str = "1323298384";
 
 /// Wrapper trait on `hyper::Client`
 pub trait YdClient{

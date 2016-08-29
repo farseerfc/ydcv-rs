@@ -115,7 +115,7 @@ impl Formatter for HtmlFormatter {
 mod tests {
     use ::ydclient::*;
     use ::Client;
-    use ::super::{AnsiFormatter, PlainFormatter, HtmlFormatter};
+    use formatters::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
     static RAW_FELIX: &'static str = r#"
     {
