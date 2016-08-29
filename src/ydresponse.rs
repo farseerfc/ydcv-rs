@@ -18,7 +18,7 @@ pub struct YdWeb{
     value: Vec<String>
 }
 
-/// Full response structure  
+/// Full response structure
 #[allow(non_snake_case)]
 #[derive(RustcDecodable, RustcEncodable, Debug)]
 pub struct YdResponse{
@@ -49,7 +49,7 @@ impl YdResponse {
     pub fn explain(&self, fmt: &Formatter) -> String {
         let mut result: Vec<String> = vec!();
 
-        if self.errorCode != 0 || 
+        if self.errorCode != 0 ||
             self.basic.is_none() && self.web.is_none() && self.translation.is_none(){
             result.push(fmt.red(" -- No result for this query."));
             return result.join("\n");

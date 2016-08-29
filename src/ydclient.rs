@@ -4,7 +4,6 @@ use std::error::Error;
 
 use rustc_serialize::json;
 use rustc_serialize::json::Json;
-#[cfg(feature="hyper")]
 use hyper::header::Connection;
 
 use ::Client;
@@ -50,12 +49,11 @@ impl YdClient for Client {
         try_box!(json::decode::<YdResponse>(&result))
     }
 
-    #[cfg(feature="hyper")]
     /// lookup a word on YD and returns a `YdPreponse`
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
         use std::io::Read;
 
-        let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
+        let mut url = try!(Url::parse("https://fanyi.youdao.com/openapi.do"));
         url.set_query_from_pairs(vec!(("keyfrom", API),
             ("key", API_KEY), ("type", "data"), ("doctype", "json"),
             ("version", "1.1"), ("q", word)).into_iter());
@@ -67,26 +65,6 @@ impl YdClient for Client {
             .read_to_string(&mut body));
 
         let raw_result = YdResponse::new_raw(body);
-        if raw {
-            Ok(raw_result)
-        }else{
-            self.decode_result(&raw_result.raw_result())
-        }
-    }
-
-    #[cfg(feature="curl")]
-    /// lookup a word on YD and returns a `YdPreponse`
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
-        let mut url = try!(Url::parse("http://fanyi.youdao.com/openapi.do"));
-        url.set_query_from_pairs(vec!(("keyfrom", API),
-            ("key", API_KEY), ("type", "data"), ("doctype", "json"),
-            ("version", "1.1"), ("q", word)).into_iter());
-
-        let resp = self.handle
-                .get(url.serialize())
-                .exec().unwrap();
-        let body = String::from_utf8_lossy(resp.get_body()).clone();
-        let raw_result = YdResponse::new_raw(body.into_owned());
         if raw {
             Ok(raw_result)
         }else{

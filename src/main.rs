@@ -1,26 +1,17 @@
 //! main module of ydcv-rs
 extern crate rustc_serialize;
 
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate log;
 extern crate env_logger;
 extern crate getopts;
-extern crate readline;
+extern crate rustyline;
 extern crate libc;
 extern crate url;
-
-#[cfg(feature="notify-rust")]
-extern crate notify_rust;
-
-#[cfg(feature="hyper")]
 extern crate hyper;
+#[cfg(feature="notify-rust")] extern crate notify_rust;
 
-#[cfg(feature="curl")]
-extern crate curl;
-
+use rustyline::Editor;
 use libc::isatty;
-
-#[cfg(feature="hyper")]
 pub use hyper::Client;
 
 
@@ -31,19 +22,6 @@ pub mod formatters;
 use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
-#[cfg(feature="curl")]
-pub struct Client{
-    handle: curl::http::Handle
-}
-
-#[cfg(feature="curl")]
-impl Client {
-    fn new() -> Client{
-        Client{
-            handle: curl::http::handle()
-        }
-    }
-}
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool){
     if raw {
@@ -136,9 +114,9 @@ fn main() {
                 }
             }
         } else {
-            let prompt = std::ffi::CString::new("> ").unwrap();
-            while let Ok(result) = readline::readline(&prompt) {
-                let word = String::from_utf8_lossy(&result.to_bytes());
+            let mut reader = Editor::<()>::new();
+            while let Ok(word) = reader.readline("> ") {
+                reader.add_history_entry(&word);
                 lookup_explain(&mut client, &word, fmt, raw);
             }
         }

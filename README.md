@@ -6,16 +6,8 @@ A rust version of [ydcv](https://github.com/felixonmars/ydcv/).
 
 # How to build
 
-Can use `curl-rust` (default) or `hyper` as HTTP client library.
-
-To use `curl-rust`, which will have 21 dependencies, build with:
 ```bash
 cargo build
-```
-
-To use `hyper`, which will have 36 dependencies, build with:
-```bash
-cargo build --no-default-features --features "hyper"
 ```
 
 # (Original) YouDao Console Version
