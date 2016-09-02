@@ -44,7 +44,7 @@ fn get_clipboard() -> String {
             return result;
         }
     }
-    return "".to_owned();
+    "".to_string()
 }
 
 
@@ -80,20 +80,16 @@ fn main() {
 
     let fmt :&mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
         &mut html
-    }else{
-        if let Some(c) = matches.opt_str("c") {
-            if c == "always" || unsafe{ isatty(1) == 1 } && c != "never" {
-                &mut ansi
-            } else {
-                &mut plain
-            }
-        }else{
-            if unsafe{ isatty(1) == 1 } {
-                &mut ansi
-            } else {
-                &mut plain
-            }
+    } else if let Some(c) = matches.opt_str("c") {
+        if c == "always" || unsafe{ isatty(1) == 1 } && c != "never" {
+            &mut ansi
+        } else {
+            &mut plain
         }
+    } else if unsafe { isatty(1) == 1 } {
+        &mut ansi
+    } else {
+        &mut plain
     };
 
     let raw = matches.opt_present("r");
