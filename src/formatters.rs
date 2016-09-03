@@ -88,7 +88,7 @@ macro_rules! html {
 impl Formatter for HtmlFormatter {
     html!(red="red", yellow="goldenrod", purple="purple", cyan="navy");
     fn underline (&self, s: &str) -> String { format!(r#"<u>{}</u>"#, s) }
-    fn default   (&self, s: &str) -> String { format!(r#"{}"#, s) }
+    fn default   (&self, s: &str) -> String { s.to_string() }
 
     #[cfg(feature="notify-rust")]
     fn print (&mut self, word: &str, body: &str) {
