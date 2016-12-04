@@ -40,12 +40,9 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: boo
 }
 
 fn get_clipboard() -> String {
-    if let Ok(out) = std::process::Command::new("xsel").arg("-o").output() {
-        if let Ok(result) = String::from_utf8(out.stdout) {
-            return result;
-        }
-    }
-    String::new()
+    std::process::Command::new("xsel").arg("-o").output().ok()
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .unwrap_or_default()
 }
 
 
