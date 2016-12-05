@@ -150,7 +150,7 @@ mod tests {
      * \x1b[33mFelix Bloch\x1b[0m
        \x1b[35m费利克斯·布洛赫\x1b[0m；\x1b[35m布洛赫\x1b[0m；\x1b[35m傅里克\x1b[0m
 ",format!("\n{}\n",
-    Client::new()
+    Client::new().unwrap()
         .decode_result(RAW_FELIX).unwrap()
         .explain(&AnsiFormatter)));
     }
@@ -169,7 +169,7 @@ Felix ['fi:liks] 费利克斯
      * Felix Bloch
        费利克斯·布洛赫；布洛赫；傅里克
 ",format!("\n{}\n",
-    Client::new()
+    Client::new().unwrap()
         .decode_result(RAW_FELIX).unwrap()
         .explain(&PlainFormatter)));
     }
@@ -188,7 +188,7 @@ Felix ['fi:liks] 费利克斯
      * <span color="goldenrod">Felix Bloch</span>
        <span color="purple">费利克斯·布洛赫</span>；<span color="purple">布洛赫</span>；<span color="purple">傅里克</span>
 "#,format!("\n{}\n",
-    Client::new()
+    Client::new().unwrap()
         .decode_result(RAW_FELIX).unwrap()
         .explain(&HtmlFormatter::new(false))));
     }
@@ -200,7 +200,7 @@ Felix ['fi:liks] 费利克斯
 <span color="navy">  Translation:</span>
     asdakda
 "#,format!("\n{}\n",
-    Client::new()
+    Client::new().unwrap()
         .lookup_word("asdakda", false).unwrap()
         .explain(&HtmlFormatter::new(false))));
     }

@@ -2,17 +2,18 @@
 extern crate rustc_serialize;
 
 #[macro_use] extern crate log;
+#[macro_use] extern crate maplit;
+#[macro_use] extern crate lazy_static;
 extern crate env_logger;
 extern crate getopts;
 extern crate rustyline;
-extern crate libc;
-extern crate url;
-extern crate hyper;
+extern crate isatty;
+extern crate reqwest;
 #[cfg(feature="notify-rust")] extern crate notify_rust;
 
 use rustyline::Editor;
-use libc::isatty;
-pub use hyper::Client;
+use isatty::stdout_isatty;
+pub use reqwest::Client;
 
 
 pub mod ydresponse;
@@ -23,15 +24,15 @@ use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
 
-fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool){
+fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool) {
     if raw {
         println!("{}", client.lookup_word(word, true).unwrap().raw_result());
-    }else{
+    } else {
         match client.lookup_word(word, false){
             Ok(ref result) => {
                 let exp = result.explain(fmt);
                 fmt.print(word, &exp);
-            }
+            },
             Err(err) => fmt.print(word,
                 &format!("Error looking-up word {}: {:?}", word, err))
         }
@@ -39,16 +40,12 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: boo
 }
 
 fn get_clipboard() -> String {
-    if let Ok(out) = std::process::Command::new("xsel").arg("-o").output() {
-        if let Ok(result) = String::from_utf8(out.stdout) {
-            return result;
-        }
-    }
-    "".to_string()
+    std::process::Command::new("xsel").arg("-o").output().ok()
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .unwrap_or_default()
 }
 
 
-#[allow(dead_code)]
 fn main() {
     env_logger::init().unwrap();
 
@@ -72,21 +69,21 @@ fn main() {
         return;
     }
 
-    let mut client = Client::new();
+    let mut client = Client::new().unwrap();
 
     let mut html = HtmlFormatter::new(matches.opt_present("n"));
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
 
-    let fmt :&mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
+    let fmt: &mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
         &mut html
     } else if let Some(c) = matches.opt_str("c") {
-        if c == "always" || unsafe{ isatty(1) == 1 } && c != "never" {
+        if c == "always" || stdout_isatty() && c != "never" {
             &mut ansi
         } else {
             &mut plain
         }
-    } else if unsafe { isatty(1) == 1 } {
+    } else if stdout_isatty() {
         &mut ansi
     } else {
         &mut plain
@@ -121,5 +118,4 @@ fn main() {
             lookup_explain(&mut client, &word, fmt, raw);
         }
     }
-    return;
 }
