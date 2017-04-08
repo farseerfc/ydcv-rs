@@ -58,14 +58,16 @@ pub struct HtmlFormatter{
     notify: bool,
     #[cfg(feature="notify-rust")]
     notifier: Notification,
+    timeout: i32
 }
 
 impl HtmlFormatter{
     #[cfg(feature="notify-rust")]
-    pub fn new(notify: bool) -> HtmlFormatter {
+    pub fn new(notify: bool, timeout: i32) -> HtmlFormatter {
         HtmlFormatter{
             notify: notify,
-            notifier: Notification::new()
+            notifier: Notification::new(),
+            timeout: timeout
         }
     }
 
@@ -97,7 +99,7 @@ impl Formatter for HtmlFormatter {
                 .appname("ydcv")
                 .summary(word)
                 .body(body)
-                .timeout(30000)
+                .timeout(self.timeout)
                 .show().unwrap();
         }else{
             println!("{}", body);

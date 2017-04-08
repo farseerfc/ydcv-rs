@@ -57,6 +57,7 @@ fn main() {
     opts.optflag("n", "notify", "send desktop notifications (implies -H)");
     opts.optflag("r", "raw", "dump raw json reply from server");
     opts.optopt("c", "color", "[auto, always, never] use color", "auto");
+    opts.optopt("t", "timeout", "timeout of notification", "30000");
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
@@ -71,7 +72,9 @@ fn main() {
 
     let mut client = Client::new().unwrap();
 
-    let mut html = HtmlFormatter::new(matches.opt_present("n"));
+    let timeout: i32 = matches.opt_str("t").map_or(30000, |x| x.parse().unwrap_or(30000));
+
+    let mut html = HtmlFormatter::new(matches.opt_present("n"),timeout);
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
 
