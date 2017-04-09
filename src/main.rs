@@ -72,11 +72,15 @@ fn main() {
 
     let mut client = Client::new().unwrap();
 
-    let timeout: i32 = matches.opt_str("t").map_or(30000, |x| x.parse().unwrap_or(30000));
 
-    let mut html = HtmlFormatter::new(matches.opt_present("n"),timeout);
+    let mut html = HtmlFormatter::new(matches.opt_present("n"));
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
+
+    if let Some(t) = matches.opt_str("t") {
+        let timeout: i32 = t.parse().unwrap_or(30000);
+        html.set_timeout(timeout);
+    }
 
     let fmt: &mut Formatter = if matches.opt_present("H") || matches.opt_present("n") {
         &mut html

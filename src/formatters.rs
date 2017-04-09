@@ -63,19 +63,25 @@ pub struct HtmlFormatter{
 
 impl HtmlFormatter{
     #[cfg(feature="notify-rust")]
-    pub fn new(notify: bool, timeout: i32) -> HtmlFormatter {
+    pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter{
             notify: notify,
             notifier: Notification::new(),
-            timeout: timeout
+            timeout: 30000
         }
     }
+
 
     #[cfg(not(feature="notify-rust"))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter{
             notify: false,
+            timeout: 0
         }
+    }
+
+    pub fn set_timeout(&mut self,timeout: i32){
+        self.timeout = timeout;
     }
 }
 
