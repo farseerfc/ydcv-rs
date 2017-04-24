@@ -11,10 +11,10 @@ use super::ydresponse::YdResponse;
 
 lazy_static! {
     /// API name
-    static ref API: String = var("YDCV_API_NAME").unwrap_or(String::from("ydcv-rs"));
+    static ref API: String = var("YDCV_API_NAME").unwrap_or_else(|_| String::from("ydcv-rs"));
 
     /// API key
-    static ref API_KEY: String = var("YDCV_API_KEY").unwrap_or(String::from("1323298384"));
+    static ref API_KEY: String = var("YDCV_API_KEY").unwrap_or_else(|_| String::from("1323298384"));
 }
 
 /// Wrapper trait on `reqwest::Client`
@@ -37,8 +37,8 @@ pub trait YdClient{
 impl YdClient for Client {
 
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, DecoderError> {
-        debug!("Recieved JSON {}", Json::from_str(&result).unwrap().pretty());
-        json::decode::<YdResponse>(&result)
+        debug!("Recieved JSON {}", Json::from_str(result).unwrap().pretty());
+        json::decode::<YdResponse>(result)
     }
 
     /// lookup a word on YD and returns a `YdPreponse`
@@ -46,14 +46,14 @@ impl YdClient for Client {
         use std::io::Read;
 
         let mut url = Url::parse("https://fanyi.youdao.com/openapi.do")?;
-        url.query_pairs_mut().extend_pairs(hashmap!{
-            "keyfrom" => API.as_str(),
-            "key" => API_KEY.as_str(),
-            "type" => "data",
-            "doctype" => "json",
-            "version" => "1.1",
-            "q" => word
-        });
+        url.query_pairs_mut().extend_pairs([
+            ("keyfrom", API.as_str()),
+            ("key", API_KEY.as_str()),
+            ("type", "data"),
+            ("doctype", "json"),
+            ("version", "1.1"),
+            ("q", word)
+        ].into_iter());
         let mut body = String::new();
         self.get(url)
             .header(Connection::close())
@@ -65,7 +65,7 @@ impl YdClient for Client {
             Ok(raw_result)
         }else{
             self.decode_result(&raw_result.raw_result())
-                .map_err(|err| Box::new(err) as Box<Error>)
+                .map_err(Into::into)
         }
     }
 }

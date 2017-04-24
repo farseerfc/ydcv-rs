@@ -2,7 +2,6 @@
 extern crate rustc_serialize;
 
 #[macro_use] extern crate log;
-#[macro_use] extern crate maplit;
 #[macro_use] extern crate lazy_static;
 extern crate env_logger;
 extern crate getopts;
