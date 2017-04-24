@@ -77,8 +77,8 @@ impl YdResponse {
         result.push(format!("{} {} {}",
             fmt.underline(&self.query),
             phonetic,
-            fmt.default(&self.translation.as_ref().unwrap().join("；"))
-            ));
+            fmt.default(&self.translation.as_ref().map(|v| v.join("; ")).unwrap_or_default())
+        ));
 
         if let Some(ref basic) = self.basic {
             if !basic.explains.is_empty() {

@@ -8,16 +8,18 @@ extern crate getopts;
 extern crate rustyline;
 extern crate isatty;
 extern crate reqwest;
+extern crate x11_clipboard;
 #[cfg(feature="notify-rust")] extern crate notify_rust;
 
+use std::time::Duration;
+use x11_clipboard::Clipboard;
 use rustyline::Editor;
 use isatty::stdout_isatty;
-pub use reqwest::Client;
+use reqwest::Client;
 
-
-pub mod ydresponse;
-pub mod ydclient;
-pub mod formatters;
+mod ydresponse;
+mod ydclient;
+mod formatters;
 
 use ydclient::YdClient;
 use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
@@ -38,9 +40,14 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: boo
     }
 }
 
-fn get_clipboard() -> String {
-    std::process::Command::new("xsel").arg("-o").output().ok()
-        .and_then(|out| String::from_utf8(out.stdout).ok())
+fn get_clipboard(clipboard: &mut Clipboard) -> String {
+    clipboard.load(
+        clipboard.getter.atoms.primary,
+        clipboard.getter.atoms.utf8_string,
+        clipboard.getter.atoms.property,
+        Duration::from_secs(3)
+    )
+        .map(|val| String::from_utf8_lossy(&val).trim_matches('\u{0}').trim().into())
         .unwrap_or_default()
 }
 
@@ -98,11 +105,12 @@ fn main() {
 
     if matches.free.is_empty() {
         if matches.opt_present("x") {
-            let mut last = get_clipboard();
+            let mut clipboard = Clipboard::new().unwrap();
+            let mut last = get_clipboard(&mut clipboard);
             println!("Waiting for selection> ");
             loop {
                 std::thread::sleep(std::time::Duration::from_millis(100));
-                let curr = get_clipboard();
+                let curr = get_clipboard(&mut clipboard);
                 if curr != last {
                     last = curr.clone();
                     if !last.is_empty() {
