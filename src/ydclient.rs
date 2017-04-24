@@ -41,7 +41,7 @@ impl YdClient for Client {
         json::decode::<YdResponse>(result)
     }
 
-    /// lookup a word on YD and returns a `YdPreponse`
+    /// lookup a word on YD and returns a `YdResponse`
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
         use std::io::Read;
 
