@@ -9,14 +9,14 @@ authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
 rustc-serialize = "0.3"
-env_logger = "0.3"
+env_logger = "0.4"
 rustyline = "1.0"
 getopts = "0.2"
 log = "0.3"
 lazy_static = "0.2"
 isatty = "0.1"
-reqwest = "0.1"
-maplit = "0.1"
+reqwest = "0.5"
+x11-clipboard = "0.1"
 
 [dependencies.notify-rust]
 version = "3.0"

@@ -66,7 +66,7 @@ impl YdResponse {
             if let (Some(us_phonetic), Some(uk_phonetic)) = (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
                 format!(" UK: [{}], US: [{}]", fmt.yellow(uk_phonetic), fmt.yellow(us_phonetic))
             } else if let Some(ref phonetic) = basic.phonetic {
-                format!("[{}]", fmt.yellow(&phonetic))
+                format!("[{}]", fmt.yellow(phonetic))
             } else {
                 "".to_owned()
             }
@@ -77,8 +77,8 @@ impl YdResponse {
         result.push(format!("{} {} {}",
             fmt.underline(&self.query),
             phonetic,
-            fmt.default(&self.translation.as_ref().unwrap().join("；"))
-            ));
+            fmt.default(&self.translation.as_ref().map(|v| v.join("; ")).unwrap_or_default())
+        ));
 
         if let Some(ref basic) = self.basic {
             if !basic.explains.is_empty() {

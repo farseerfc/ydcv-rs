@@ -1,4 +1,8 @@
 language: rust
 
+sudo: required
+before_script:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libx11-xcb-dev
 script:
     - cargo test --verbose --no-default-features
