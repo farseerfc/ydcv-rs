@@ -109,7 +109,7 @@ fn main() {
             let mut last = get_clipboard(&mut clipboard);
             println!("Waiting for selection> ");
             loop {
-                std::thread::sleep(std::time::Duration::from_millis(100));
+                std::thread::sleep(Duration::from_secs(1));
                 let curr = get_clipboard(&mut clipboard);
                 if curr != last {
                     last = curr.clone();
