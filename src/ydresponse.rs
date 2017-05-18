@@ -3,7 +3,7 @@
 use ::formatters::Formatter;
 
 /// Basic result structure
-#[derive(RustcDecodable, RustcEncodable, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct YdBasic{
     explains: Vec<String>,
     phonetic: Option<String>,
@@ -12,7 +12,7 @@ pub struct YdBasic{
 }
 
 /// Web result structure
-#[derive(RustcDecodable, RustcEncodable, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct YdWeb{
     key: String,
     value: Vec<String>
@@ -20,7 +20,7 @@ pub struct YdWeb{
 
 /// Full response structure
 #[allow(non_snake_case)]
-#[derive(RustcDecodable, RustcEncodable, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct YdResponse{
     query: String,
     errorCode: i32,

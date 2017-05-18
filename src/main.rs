@@ -1,5 +1,7 @@
 //! main module of ydcv-rs
-extern crate rustc_serialize;
+#[macro_use] extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
 
 #[macro_use] extern crate structopt_derive;
 extern crate structopt;
