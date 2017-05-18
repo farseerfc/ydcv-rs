@@ -3,9 +3,6 @@ rust:
     - stable
     - beta
     - nightly
-matrix:
-    allow_failures:
-        - rust: stable
 
 sudo: required
 before_script:
