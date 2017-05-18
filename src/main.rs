@@ -67,7 +67,12 @@ fn main() {
 
     let matches = match opts.parse(&args[1..]){
         Ok(m) => m,
-        Err(f) => panic!(f.to_owned())
+        Err(_) => {
+            println!("Failed to parse command options: \"{}\"", args[1..].join(" "));
+            let brief = format!("Usage: {} [options] words", args[0]);
+            print!("{}", opts.usage(&brief));
+            return;
+        }
     };
 
     if matches.opt_present("h") {
