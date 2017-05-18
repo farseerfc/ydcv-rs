@@ -77,10 +77,10 @@ impl HtmlFormatter{
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter{
             notify: false,
-            timeout: 0
         }
     }
 
+    #[cfg(feature="notify-rust")]
     pub fn set_timeout(&mut self,timeout: i32){
         self.timeout = timeout;
     }
