@@ -2,7 +2,7 @@
 
 use std::env::var;
 use std::error::Error;
-use rustc_serialize::json::{ self, Json, DecoderError };
+use serde_json::{ self, Error as SerdeError };
 use reqwest::header::Connection;
 use reqwest::Url;
 use ::Client;
@@ -30,15 +30,17 @@ pub trait YdClient{
     ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
     /// ```
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>>;
-    fn decode_result(&mut self, result: &str) -> Result<YdResponse, DecoderError>;
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError>;
 }
 
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
 
-    fn decode_result(&mut self, result: &str) -> Result<YdResponse, DecoderError> {
-        debug!("Recieved JSON {}", Json::from_str(result).unwrap().pretty());
-        json::decode::<YdResponse>(result)
+    fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
+        debug!("Recieved JSON {}", serde_json::from_str::<YdResponse>(result)
+            .and_then(|v| serde_json::to_string_pretty(&v))
+            .unwrap());
+        serde_json::from_str(result)
     }
 
     /// lookup a word on YD and returns a `YdResponse`
