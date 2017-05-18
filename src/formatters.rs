@@ -58,6 +58,7 @@ pub struct HtmlFormatter{
     notify: bool,
     #[cfg(feature="notify-rust")]
     notifier: Notification,
+    #[cfg(feature="notify-rust")]
     timeout: i32
 }
 
