@@ -78,9 +78,7 @@ impl HtmlFormatter{
 
     #[cfg(not(feature="notify-rust"))]
     pub fn new(_: bool) -> HtmlFormatter {
-        HtmlFormatter{
-            notify: false,
-        }
+        HtmlFormatter {}
     }
 
     #[cfg(feature="notify-rust")]
@@ -117,7 +115,7 @@ impl Formatter for HtmlFormatter {
     }
 
     #[cfg(not(feature="notify-rust"))]
-    fn print (&mut self, word: &str, body: &str) {
+    fn print (&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
 }
