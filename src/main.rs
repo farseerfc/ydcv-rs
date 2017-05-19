@@ -85,7 +85,7 @@ fn main() {
 
     let mut client = Client::new().unwrap();
 
-    let mut html = HtmlFormatter::new(ydcv_options.html);
+    let mut html = HtmlFormatter::new(ydcv_options.html ||ydcv_options.notify );
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
 
