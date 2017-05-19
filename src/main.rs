@@ -67,7 +67,7 @@ struct YdcvOptions {
     #[cfg(feature="notify-rust")]
     #[structopt(short = "n", long = "notify", help = "send desktop notifications (implies -H)")]
     notify: bool,
-    #[structopt(short = "r", long = "raw", help = "dump raw json reply from server", conflicts_with = "html")]
+    #[structopt(short = "r", long = "raw", help = "dump raw json reply from server", conflicts_with = "html", conflicts_with = "notify")]
     raw: bool,
     #[structopt(short = "c", long = "color", help = "[auto, always, never] use color", default_value = "auto")]
     color: String,
