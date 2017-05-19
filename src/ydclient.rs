@@ -2,10 +2,10 @@
 
 use std::env::var;
 use std::error::Error;
-use serde_json::{ self, Error as SerdeError };
+use serde_json::{self, Error as SerdeError};
 use reqwest::header::Connection;
 use reqwest::Url;
-use ::Client;
+use Client;
 use super::ydresponse::YdResponse;
 
 
@@ -18,7 +18,7 @@ lazy_static! {
 }
 
 /// Wrapper trait on `reqwest::Client`
-pub trait YdClient{
+pub trait YdClient {
     /// lookup a word on YD and returns a `YdPreponse`
     ///
     /// # Examples
@@ -35,11 +35,11 @@ pub trait YdClient{
 
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
-
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
-        debug!("Recieved JSON {}", serde_json::from_str::<YdResponse>(result)
-            .and_then(|v| serde_json::to_string_pretty(&v))
-            .unwrap());
+        debug!("Recieved JSON {}",
+               serde_json::from_str::<YdResponse>(result)
+                   .and_then(|v| serde_json::to_string_pretty(&v))
+                   .unwrap());
         serde_json::from_str(result)
     }
 
@@ -48,14 +48,14 @@ impl YdClient for Client {
         use std::io::Read;
 
         let mut url = Url::parse("https://fanyi.youdao.com/openapi.do")?;
-        url.query_pairs_mut().extend_pairs([
-            ("keyfrom", API.as_str()),
-            ("key", API_KEY.as_str()),
-            ("type", "data"),
-            ("doctype", "json"),
-            ("version", "1.1"),
-            ("q", word)
-        ].into_iter());
+        url.query_pairs_mut()
+            .extend_pairs([("keyfrom", API.as_str()),
+                           ("key", API_KEY.as_str()),
+                           ("type", "data"),
+                           ("doctype", "json"),
+                           ("version", "1.1"),
+                           ("q", word)]
+                                  .into_iter());
         let mut body = String::new();
         self.get(url)
             .header(Connection::close())
@@ -65,7 +65,7 @@ impl YdClient for Client {
         let raw_result = YdResponse::new_raw(body);
         if raw {
             Ok(raw_result)
-        }else{
+        } else {
             self.decode_result(&raw_result.raw_result())
                 .map_err(Into::into)
         }
@@ -75,23 +75,26 @@ impl YdClient for Client {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ::Client;
+    use Client;
 
     #[test]
-    fn test_lookup_word_0(){
+    fn test_lookup_word_0() {
         assert_eq!("YdResponse('hello')",
-            format!("{}", Client::new().unwrap().lookup_word("hello", false).unwrap()));
+                   format!("{}",
+                           Client::new().unwrap().lookup_word("hello", false).unwrap()));
     }
 
     #[test]
-    fn test_lookup_word_1(){
+    fn test_lookup_word_1() {
         assert_eq!("YdResponse('world')",
-            format!("{}", Client::new().unwrap().lookup_word("world", false).unwrap()));
+                   format!("{}",
+                           Client::new().unwrap().lookup_word("world", false).unwrap()));
     }
 
     #[test]
-    fn test_lookup_word_2(){
+    fn test_lookup_word_2() {
         assert_eq!("YdResponse('<+*>?_')",
-            format!("{}", Client::new().unwrap().lookup_word("<+*>?_", false).unwrap()));
+                   format!("{}",
+                           Client::new().unwrap().lookup_word("<+*>?_", false).unwrap()));
     }
 }

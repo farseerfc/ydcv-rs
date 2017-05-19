@@ -1,19 +1,24 @@
 //! main module of ydcv-rs
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
-#[macro_use] extern crate structopt_derive;
+#[macro_use]
+extern crate structopt_derive;
 extern crate structopt;
 
-#[macro_use] extern crate log;
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate lazy_static;
 extern crate env_logger;
 extern crate rustyline;
 extern crate isatty;
 extern crate reqwest;
 extern crate x11_clipboard;
-#[cfg(feature="notify-rust")] extern crate notify_rust;
+#[cfg(feature="notify-rust")]
+extern crate notify_rust;
 
 use std::time::Duration;
 use structopt::StructOpt;
@@ -34,25 +39,28 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: boo
     if raw {
         println!("{}", client.lookup_word(word, true).unwrap().raw_result());
     } else {
-        match client.lookup_word(word, false){
+        match client.lookup_word(word, false) {
             Ok(ref result) => {
                 let exp = result.explain(fmt);
                 fmt.print(word, &exp);
-            },
-            Err(err) => fmt.print(word,
-                &format!("Error looking-up word {}: {:?}", word, err))
+            }
+            Err(err) => fmt.print(word, &format!("Error looking-up word {}: {:?}", word, err)),
         }
     }
 }
 
 fn get_clipboard(clipboard: &mut Clipboard) -> String {
-    clipboard.load(
-        clipboard.getter.atoms.primary,
-        clipboard.getter.atoms.utf8_string,
-        clipboard.getter.atoms.property,
-        Duration::from_secs(3)
-    )
-        .map(|val| String::from_utf8_lossy(&val).trim_matches('\u{0}').trim().into())
+    clipboard
+        .load(clipboard.getter.atoms.primary,
+              clipboard.getter.atoms.utf8_string,
+              clipboard.getter.atoms.property,
+              Duration::from_secs(3))
+        .map(|val| {
+                 String::from_utf8_lossy(&val)
+                     .trim_matches('\u{0}')
+                     .trim()
+                     .into()
+             })
         .unwrap_or_default()
 }
 
@@ -60,22 +68,38 @@ fn get_clipboard(clipboard: &mut Clipboard) -> String {
 #[derive(StructOpt)]
 #[structopt(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
-    #[structopt(short = "x", long = "selection", help = "show explaination of current selection")]
+    #[structopt(short = "x", long = "selection",
+                help = "show explaination of current selection")]
     selection: bool,
-    #[structopt(short = "H", long = "html", help = "HTML-style output")]
+
+    #[structopt(short = "H", long = "html",
+                help = "HTML-style output")]
     html: bool,
+
     #[cfg(feature="notify-rust")]
-    #[structopt(short = "n", long = "notify", help = "send desktop notifications (implies -H)")]
+    #[structopt(short = "n", long = "notify",
+                help = "send desktop notifications (implies -H)")]
     notify: bool,
-    #[structopt(short = "r", long = "raw", help = "dump raw json reply from server", conflicts_with = "html", conflicts_with = "notify")]
+
+    #[structopt(short = "r", long = "raw",
+                help = "dump raw json reply from server",
+                conflicts_with = "html",
+                conflicts_with = "notify")]
     raw: bool,
-    #[structopt(short = "c", long = "color", help = "[auto, always, never] use color", default_value = "auto")]
+
+    #[structopt(short = "c", long = "color",
+                help = "[auto, always, never] use color",
+                default_value = "auto")]
     color: String,
+
     #[cfg(feature="notify-rust")]
-    #[structopt(short = "t", long = "timeout", help = "timeout of notification (second)", default_value = "30")]
+    #[structopt(short = "t", long = "timeout",
+                help = "timeout of notification (second)",
+                default_value = "30")]
     timeout: i32,
+
     #[structopt(value_name = "WORDS")]
-    free: Vec<String>
+    free: Vec<String>,
 }
 
 
@@ -100,7 +124,8 @@ fn main() {
 
     let fmt: &mut Formatter = if ydcv_options.html || notify_enabled {
         &mut html
-    } else if ydcv_options.color == "always" || stdout_isatty() && ydcv_options.color != "never" {
+    } else if ydcv_options.color == "always" ||
+              stdout_isatty() && ydcv_options.color != "never" {
         &mut ansi
     } else {
         &mut plain
