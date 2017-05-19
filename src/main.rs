@@ -64,9 +64,10 @@ struct YdcvOptions {
     selection: bool,
     #[structopt(short = "H", long = "html", help = "HTML-style output")]
     html: bool,
+    #[cfg(feature="notify-rust")]
     #[structopt(short = "n", long = "notify", help = "send desktop notifications (implies -H)")]
     notify: bool,
-    #[structopt(short = "r", long = "raw", help = "dump raw json reply from server")]
+    #[structopt(short = "r", long = "raw", help = "dump raw json reply from server", conflicts_with = "html")]
     raw: bool,
     #[structopt(short = "c", long = "color", help = "[auto, always, never] use color", default_value = "auto")]
     color: String,
@@ -83,23 +84,26 @@ fn main() {
 
     let ydcv_options = YdcvOptions::from_args();
 
+    #[cfg(feature="notify-rust")]
+    let notify_enabled = ydcv_options.notify;
+    #[cfg(not(feature="notify-rust"))]
+    let notify_enabled = false;
+
     let mut client = Client::new().unwrap();
 
-    let mut html = HtmlFormatter::new(ydcv_options.html ||ydcv_options.notify );
+    let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
 
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
-    let fmt: &mut Formatter = if ydcv_options.html || ydcv_options.notify {
+    let fmt: &mut Formatter = if ydcv_options.html || notify_enabled {
         &mut html
+    } else if ydcv_options.color == "always" || stdout_isatty() && ydcv_options.color != "never" {
+        &mut ansi
     } else {
-        if ydcv_options.color == "always" || stdout_isatty() && ydcv_options.color != "never" {
-            &mut ansi
-        } else {
-            &mut plain
-        }
+        &mut plain
     };
 
     if ydcv_options.free.is_empty() {

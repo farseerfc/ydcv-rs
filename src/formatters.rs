@@ -54,13 +54,16 @@ impl Formatter for AnsiFormatter {
 
 
 /// HTML-style formatter, suitable for desktop notification
-pub struct HtmlFormatter{
+#[cfg(feature="notify-rust")]
+pub struct HtmlFormatter {
     notify: bool,
-    #[cfg(feature="notify-rust")]
     notifier: Notification,
-    #[cfg(feature="notify-rust")]
     timeout: i32
 }
+
+/// HTML-style formatter, suitable for desktop notification
+#[cfg(not(feature="notify-rust"))]
+pub struct HtmlFormatter {}
 
 impl HtmlFormatter{
     #[cfg(feature="notify-rust")]
