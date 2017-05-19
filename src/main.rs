@@ -85,27 +85,25 @@ fn main() {
     let ydcv_options = YdcvOptions::from_args();
 
     #[cfg(feature="notify-rust")]
-    let is_enable_notify = ydcv_options.notify;
+    let notify_enabled = ydcv_options.notify;
     #[cfg(not(feature="notify-rust"))]
-    let is_enable_notify = false;
+    let notify_enabled = false;
 
     let mut client = Client::new().unwrap();
 
-    let mut html = HtmlFormatter::new(is_enable_notify);
+    let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter;
     let mut plain = PlainFormatter;
 
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
-    let fmt: &mut Formatter = if ydcv_options.html || is_enable_notify {
+    let fmt: &mut Formatter = if ydcv_options.html || notify_enabled {
         &mut html
+    } else if ydcv_options.color == "always" || stdout_isatty() && ydcv_options.color != "never" {
+        &mut ansi
     } else {
-        if ydcv_options.color == "always" || stdout_isatty() && ydcv_options.color != "never" {
-            &mut ansi
-        } else {
-            &mut plain
-        }
+        &mut plain
     };
 
     if ydcv_options.free.is_empty() {
