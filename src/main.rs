@@ -64,7 +64,7 @@ struct YdcvOptions {
     selection: bool,
     #[structopt(short = "H", long = "html", help = "HTML-style output")]
     html: bool,
-    #[structopt(short = "n", long = "notify", help = "send desktop notifications (implies -H)", requires = "html")]
+    #[structopt(short = "n", long = "notify", help = "send desktop notifications (implies -H)")]
     notify: bool,
     #[structopt(short = "r", long = "raw", help = "dump raw json reply from server")]
     raw: bool,

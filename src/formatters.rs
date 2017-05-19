@@ -10,7 +10,6 @@ macro_rules! def {
 }
 
 /// Base trait for formatters
-#[cfg_attr(rustfmt,rustfmt_skip)]
 pub trait Formatter {
     fn red       (&self, &str) -> String;
     fn yellow    (&self, &str) -> String;
