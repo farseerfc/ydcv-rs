@@ -57,7 +57,7 @@ impl YdClient for Client {
                            ("q", word)]
                                   .into_iter());
         let mut body = String::new();
-        self.get(url)
+        self.get(url)?
             .header(Connection::close())
             .send()?
             .read_to_string(&mut body)?;

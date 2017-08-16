@@ -8,8 +8,8 @@ version = "0.3.8"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
-structopt = "0.0.3"
-structopt-derive = "0.0.3"
+structopt = "0.1"
+structopt-derive = "0.1"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
@@ -18,8 +18,8 @@ rustyline = "1.0"
 log = "0.3"
 lazy_static = "0.2"
 isatty = "0.1"
-reqwest = "0.6"
-x11-clipboard = "0.1"
+reqwest = "0.7"
+x11-clipboard = "0.2"
 
 [dependencies.notify-rust]
 version = "3.0"
