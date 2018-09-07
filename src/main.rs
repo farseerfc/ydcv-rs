@@ -16,12 +16,15 @@ extern crate env_logger;
 extern crate rustyline;
 extern crate isatty;
 extern crate reqwest;
+
+#[cfg(feature="x11-clipboard")]
 extern crate x11_clipboard;
 #[cfg(feature="notify-rust")]
 extern crate notify_rust;
 
 use std::time::Duration;
 use structopt::StructOpt;
+#[cfg(feature="x11-clipboard")]
 use x11_clipboard::Clipboard;
 use rustyline::Editor;
 use isatty::stdout_isatty;
@@ -49,6 +52,7 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: boo
     }
 }
 
+#[cfg(feature="x11-clipboard")]
 fn get_clipboard(clipboard: &mut Clipboard) -> String {
     clipboard
         .load(clipboard.getter.atoms.primary,
@@ -68,6 +72,7 @@ fn get_clipboard(clipboard: &mut Clipboard) -> String {
 #[derive(StructOpt)]
 #[structopt(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
+    #[cfg(feature="x11-clipboard")]
     #[structopt(short = "x", long = "selection",
                 help = "show explaination of current selection")]
     selection: bool,
@@ -113,6 +118,11 @@ fn main() {
     #[cfg(not(feature="notify-rust"))]
     let notify_enabled = false;
 
+    #[cfg(feature="x11-clipboard")]
+    let selection_enabled = ydcv_options.selection;
+    #[cfg(not(feature="x11-clipboard"))]
+    let selection_enabled = false;
+
     let mut client = Client::new().unwrap();
 
     let mut html = HtmlFormatter::new(notify_enabled);
@@ -132,25 +142,28 @@ fn main() {
     };
 
     if ydcv_options.free.is_empty() {
-        if ydcv_options.selection {
-            let mut clipboard = Clipboard::new().unwrap();
-            let mut last = get_clipboard(&mut clipboard);
-            println!("Waiting for selection> ");
-            loop {
-                std::thread::sleep(Duration::from_secs(1));
-                let curr = get_clipboard(&mut clipboard);
-                if curr != last {
-                    last = curr.clone();
-                    if !last.is_empty() {
-                        lookup_explain(&mut client, &curr, fmt, ydcv_options.raw);
-                        println!("Waiting for selection> ");
+        if selection_enabled {
+            #[cfg(feature="x11-clipboard")]
+            {
+                let mut clipboard = Clipboard::new().unwrap();
+                let mut last = get_clipboard(&mut clipboard);
+                println!("Waiting for selection> ");
+                loop {
+                    std::thread::sleep(Duration::from_secs(1));
+                    let curr = get_clipboard(&mut clipboard);
+                    if curr != last {
+                        last = curr.clone();
+                        if !last.is_empty() {
+                            lookup_explain(&mut client, &curr, fmt, ydcv_options.raw);
+                            println!("Waiting for selection> ");
+                        }
                     }
                 }
             }
         } else {
             let mut reader = Editor::<()>::new();
             while let Ok(word) = reader.readline("> ") {
-                reader.add_history_entry(&word);
+                reader.add_history_entry(word.as_ref());
                 lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
             }
         }

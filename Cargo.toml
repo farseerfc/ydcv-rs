@@ -4,26 +4,29 @@ description = "A rust version of YouDao Console Version"
 repository = "https://github.com/farseerfc/ydcv-rs"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.3.8"
+version = "0.3.9"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
-structopt = "0.0.3"
-structopt-derive = "0.0.3"
+structopt = "0.2"
+structopt-derive = "0.2"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
 env_logger = "0.4"
-rustyline = "1.0"
+rustyline = "2.0"
 log = "0.3"
 lazy_static = "0.2"
 isatty = "0.1"
 reqwest = "0.6"
-x11-clipboard = "0.1"
 
 [dependencies.notify-rust]
 version = "3.0"
 optional = true
 
+[dependencies.x11-clipboard]
+version = "0.2"
+optional = true
+
 [features]
-default = ["notify-rust"]
+default = ["notify-rust", "x11-clipboard"]
