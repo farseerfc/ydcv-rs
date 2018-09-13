@@ -4,6 +4,7 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
+#[macro_use]
 extern crate structopt_derive;
 extern crate structopt;
 
