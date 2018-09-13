@@ -3,7 +3,7 @@
 use std::env::var;
 use std::error::Error;
 use serde_json::{self, Error as SerdeError};
-use reqwest::header::Connection;
+// use reqwest::header::Connection;
 use reqwest::Url;
 use Client;
 use super::ydresponse::YdResponse;
@@ -58,7 +58,7 @@ impl YdClient for Client {
                                   .into_iter());
         let mut body = String::new();
         self.get(url)
-            .header(Connection::close())
+            // .header(Connection::close())
             .send()?
             .read_to_string(&mut body)?;
 
@@ -81,20 +81,20 @@ mod tests {
     fn test_lookup_word_0() {
         assert_eq!("YdResponse('hello')",
                    format!("{}",
-                           Client::new().unwrap().lookup_word("hello", false).unwrap()));
+                           Client::new().lookup_word("hello", false).unwrap()));
     }
 
     #[test]
     fn test_lookup_word_1() {
         assert_eq!("YdResponse('world')",
                    format!("{}",
-                           Client::new().unwrap().lookup_word("world", false).unwrap()));
+                           Client::new().lookup_word("world", false).unwrap()));
     }
 
     #[test]
     fn test_lookup_word_2() {
         assert_eq!("YdResponse('<+*>?_')",
                    format!("{}",
-                           Client::new().unwrap().lookup_word("<+*>?_", false).unwrap()));
+                           Client::new().lookup_word("<+*>?_", false).unwrap()));
     }
 }

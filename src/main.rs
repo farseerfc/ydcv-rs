@@ -4,7 +4,6 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
-#[macro_use]
 extern crate structopt_derive;
 extern crate structopt;
 
@@ -109,7 +108,7 @@ struct YdcvOptions {
 
 
 fn main() {
-    env_logger::init().unwrap();
+    env_logger::init();
 
     let ydcv_options = YdcvOptions::from_args();
 
@@ -123,7 +122,7 @@ fn main() {
     #[cfg(not(feature="x11-clipboard"))]
     let selection_enabled = false;
 
-    let mut client = Client::new().unwrap();
+    let mut client = Client::new();
 
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter;

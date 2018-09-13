@@ -11,12 +11,12 @@ macro_rules! def {
 
 /// Base trait for formatters
 pub trait Formatter {
-    fn red(&self, &str) -> String;
-    fn yellow(&self, &str) -> String;
-    fn purple(&self, &str) -> String;
-    fn cyan(&self, &str) -> String;
-    fn underline(&self, &str) -> String;
-    fn default(&self, &str) -> String;
+    def!(red);
+    def!(yellow);
+    def!(purple);
+    def!(cyan);
+    def!(underline);
+    def!(default);
 
     fn print(&mut self, word: &str, body: &str);
 }
@@ -164,7 +164,6 @@ mod tests {
     fn test_explain_ansi() {
         let result = format!("\n{}\n",
                              Client::new()
-                                 .unwrap()
                                  .decode_result(RAW_FELIX)
                                  .unwrap()
                                  .explain(&AnsiFormatter));
@@ -187,7 +186,6 @@ mod tests {
     fn test_explain_plain() {
         let result = format!("\n{}\n",
                              Client::new()
-                                 .unwrap()
                                  .decode_result(RAW_FELIX)
                                  .unwrap()
                                  .explain(&PlainFormatter));
@@ -220,7 +218,7 @@ Felix ['fi:liks] 费利克斯
      * <span color="goldenrod">Felix Bloch</span>
        <span color="purple">费利克斯·布洛赫</span>；<span color="purple">布洛赫</span>；<span color="purple">傅里克</span>
 "#,format!("\n{}\n",
-    Client::new().unwrap()
+    Client::new()
         .decode_result(RAW_FELIX).unwrap()
         .explain(&HtmlFormatter::new(false))));
     }
@@ -229,7 +227,6 @@ Felix ['fi:liks] 费利克斯
     fn test_explain_html_1() {
         let result = format!("\n{}\n",
                              Client::new()
-                                 .unwrap()
                                  .lookup_word("asdakda", false)
                                  .unwrap()
                                  .explain(&HtmlFormatter::new(false)));
