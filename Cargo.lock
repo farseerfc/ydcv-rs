@@ -1472,7 +1472,7 @@ dependencies = [
 
 [[package]]
 name = "ydcv-rs"
-version = "0.3.10"
+version = "0.3.10-pre"
 dependencies = [
  "env_logger 0.5.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "isatty 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",

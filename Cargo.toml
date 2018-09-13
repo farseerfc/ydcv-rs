@@ -4,7 +4,7 @@ description = "A rust version of YouDao Console Version"
 repository = "https://github.com/farseerfc/ydcv-rs"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.3.10"
+version = "0.3.10-pre"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 
 [dependencies]
@@ -21,7 +21,7 @@ isatty = "0.1"
 reqwest = { git = "https://github.com/seanmonstar/reqwest"}
 
 [dependencies.notify-rust]
-version = "3.0"
+version = "3.4"
 optional = true
 
 [dependencies.x11-clipboard]
