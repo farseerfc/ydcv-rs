@@ -164,7 +164,9 @@ fn main() {
             let mut reader = Editor::<()>::new();
             while let Ok(word) = reader.readline("> ") {
                 reader.add_history_entry(word.as_ref());
-                lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
+                if !word.is_empty() {
+                    lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
+                }
             }
         }
     } else {
