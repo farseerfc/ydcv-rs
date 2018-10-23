@@ -147,10 +147,11 @@ fn main() {
             {
                 let mut clipboard = Clipboard::new().unwrap();
                 let mut last = get_clipboard(&mut clipboard);
+                last = last.trim().to_string();
                 println!("Waiting for selection> ");
                 loop {
                     std::thread::sleep(Duration::from_secs(1));
-                    let curr = get_clipboard(&mut clipboard);
+                    let curr = get_clipboard(&mut clipboard).trim().to_string();
                     if curr != last {
                         last = curr.clone();
                         if !last.is_empty() {
@@ -162,7 +163,8 @@ fn main() {
             }
         } else {
             let mut reader = Editor::<()>::new();
-            while let Ok(word) = reader.readline("> ") {
+            while let Ok(w) = reader.readline("> ") {
+                let word = w.trim();
                 reader.add_history_entry(word.as_ref());
                 if !word.is_empty() {
                     lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
@@ -171,7 +173,7 @@ fn main() {
         }
     } else {
         for word in ydcv_options.free {
-            lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
+            lookup_explain(&mut client, &word.trim(), fmt, ydcv_options.raw);
         }
     }
 }
