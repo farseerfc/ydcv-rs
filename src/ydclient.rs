@@ -62,11 +62,11 @@ impl YdClient for Client {
             .send()?
             .read_to_string(&mut body)?;
 
-        let raw_result = YdResponse::new_raw(body);
+        let raw_result = YdResponse::new_raw(body.clone());
         if raw {
-            Ok(raw_result)
+            raw_result.map_err(Into::into)
         } else {
-            self.decode_result(&raw_result.raw_result())
+            self.decode_result(&body)
                 .map_err(Into::into)
         }
     }

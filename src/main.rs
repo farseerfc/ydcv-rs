@@ -4,8 +4,8 @@ extern crate serde_derive;
 extern crate serde;
 extern crate serde_json;
 
-#[macro_use]
-extern crate structopt_derive;
+//#[macro_use]
+//extern crate structopt_derive;
 extern crate structopt;
 
 #[macro_use]
@@ -40,7 +40,7 @@ use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool) {
     if raw {
-        println!("{}", client.lookup_word(word, true).unwrap().raw_result());
+        println!("{}", serde_json::to_string(&client.lookup_word(word, true).unwrap()).unwrap());
     } else {
         match client.lookup_word(word, false) {
             Ok(ref result) => {

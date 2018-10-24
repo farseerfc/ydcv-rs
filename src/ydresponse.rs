@@ -1,6 +1,7 @@
 //! parser for the returned result from YD
 
 use formatters::Formatter;
+use serde_json::{self, Error as SerdeError};
 
 /// Basic result structure
 #[derive(Serialize, Deserialize, Debug)]
@@ -31,18 +32,8 @@ pub struct YdResponse {
 
 
 impl YdResponse {
-    pub fn new_raw(result: String) -> YdResponse {
-        YdResponse {
-            query: result,
-            errorCode: 0,
-            basic: None,
-            translation: None,
-            web: None,
-        }
-    }
-
-    pub fn raw_result(&self) -> String {
-        self.query.clone()
+    pub fn new_raw(result: String) -> Result<YdResponse,SerdeError> {
+        serde_json::from_str(&result)
     }
 
     /// Explain the result in text format using a formatter
