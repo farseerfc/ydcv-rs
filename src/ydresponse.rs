@@ -37,7 +37,7 @@ impl YdResponse {
     }
 
     /// Explain the result in text format using a formatter
-    pub fn explain(&self, fmt: &Formatter) -> String {
+    pub fn explain(&self, fmt: &dyn Formatter) -> String {
         let mut result: Vec<String> = vec![];
 
         if self.errorCode != 0 ||
@@ -111,7 +111,7 @@ use std::fmt;
 
 #[cfg(test)]
 impl fmt::Display for YdResponse {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "YdResponse('{}')", self.query)
     }
 }

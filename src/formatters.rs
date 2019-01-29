@@ -137,9 +137,9 @@ impl Formatter for HtmlFormatter {
 
 #[cfg(test)]
 mod tests {
-    use ydclient::*;
-    use Client;
-    use formatters::{AnsiFormatter, PlainFormatter, HtmlFormatter};
+    use crate::ydclient::*;
+    use reqwest::Client;
+    use crate::formatters::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
     static RAW_FELIX: &'static str = r#"
     {

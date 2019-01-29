@@ -5,7 +5,7 @@ use std::error::Error;
 use serde_json::{self, Error as SerdeError};
 // use reqwest::header::Connection;
 use reqwest::Url;
-use Client;
+use crate::Client;
 use super::ydresponse::YdResponse;
 
 
@@ -29,7 +29,7 @@ pub trait YdClient {
     /// assert_eq!("YdResponse('hello')",
     ///        format!("{}", Client::new().lookup_word("hello").unwrap()));
     /// ```
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>>;
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>>;
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError>;
 }
 
@@ -44,7 +44,7 @@ impl YdClient for Client {
     }
 
     /// lookup a word on YD and returns a `YdResponse`
-    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<Error>> {
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
         use std::io::Read;
 
         let mut url = Url::parse("https://fanyi.youdao.com/openapi.do")?;

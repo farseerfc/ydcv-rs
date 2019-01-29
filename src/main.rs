@@ -1,32 +1,26 @@
 //! main module of ydcv-rs
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate serde_json;
 
-extern crate structopt_derive;
-extern crate structopt;
+use serde_json;
+use structopt;
+use atty;
 
 #[macro_use]
 extern crate log;
+
 #[macro_use]
 extern crate lazy_static;
-extern crate env_logger;
-extern crate rustyline;
-extern crate isatty;
-extern crate reqwest;
+
+use env_logger;
 
 #[cfg(feature="x11-clipboard")]
-extern crate x11_clipboard;
-#[cfg(feature="notify-rust")]
-extern crate notify_rust;
-
 use std::time::Duration;
-use structopt::StructOpt;
 #[cfg(feature="x11-clipboard")]
 use x11_clipboard::Clipboard;
+
+use structopt::StructOpt;
 use rustyline::Editor;
-use isatty::stdout_isatty;
 use reqwest::Client;
 
 mod ydresponse;
@@ -37,7 +31,7 @@ use crate::ydclient::YdClient;
 use crate::formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
 
-fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool) {
+fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw: bool) {
     if raw {
         println!("{}", serde_json::to_string(&client.lookup_word(word, true).unwrap()).unwrap());
     } else {
@@ -131,10 +125,10 @@ fn main() {
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
-    let fmt: &mut Formatter = if ydcv_options.html || notify_enabled {
+    let fmt: &mut dyn Formatter = if ydcv_options.html || notify_enabled {
         &mut html
     } else if ydcv_options.color == "always" ||
-              stdout_isatty() && ydcv_options.color != "never" {
+              atty::is(atty::Stream::Stdout) && ydcv_options.color != "never" {
         &mut ansi
     } else {
         &mut plain
