@@ -71,12 +71,7 @@ fn get_clipboard(clipboard: &mut SystemClipboard) -> String {
 #[derive(StructOpt)]
 #[structopt(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
-    #[cfg(feature="x11-clipboard")]
-    #[structopt(short = "x", long = "selection",
-                help = "show explaination of current selection")]
-    selection: bool,
-
-    #[cfg(feature="clipboard2")]
+    #[cfg(any(feature="x11-clipboard", feature="clipboard2"))]
     #[structopt(short = "x", long = "selection",
                 help = "show explaination of current selection")]
     selection: bool,
@@ -85,7 +80,7 @@ struct YdcvOptions {
                 help = "HTML-style output")]
     html: bool,
 
-    #[cfg(feature="notify-rust")]
+    #[cfg(any(feature="notify-rust", feature="winrt-notification"))]
     #[structopt(short = "n", long = "notify",
                 help = "send desktop notifications (implies -H)")]
     notify: bool,
