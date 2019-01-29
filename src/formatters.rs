@@ -100,8 +100,7 @@ impl HtmlFormatter {
     }
 
 
-    #[cfg(not(feature="notify-rust"))]
-    #[cfg(not(feature="winrt-notification"))]
+    #[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter {}
     }
@@ -162,8 +161,7 @@ impl Formatter for HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature="notify-rust"))]
-    #[cfg(not(feature="winrt-notification"))]
+    #[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
