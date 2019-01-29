@@ -18,6 +18,10 @@ use env_logger;
 use std::time::Duration;
 #[cfg(feature="x11-clipboard")]
 use x11_clipboard::Clipboard;
+#[cfg(feature="clipboard2")]
+use std::time::Duration;
+#[cfg(feature="clipboard2")]
+use clipboard2::{Clipboard, SystemClipboard};
 
 use structopt::StructOpt;
 use rustyline::Editor;
@@ -49,23 +53,32 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw:
 fn get_clipboard(clipboard: &mut Clipboard) -> String {
     clipboard
         .load(clipboard.getter.atoms.primary,
-              clipboard.getter.atoms.utf8_string,
-              clipboard.getter.atoms.property,
-              Duration::from_secs(3))
+            clipboard.getter.atoms.utf8_string,
+            clipboard.getter.atoms.property,
+            Duration::from_secs(3))
         .map(|val| {
-                 String::from_utf8_lossy(&val)
-                     .trim_matches('\u{0}')
-                     .trim()
-                     .into()
-             })
+                String::from_utf8_lossy(&val)
+                    .trim_matches('\u{0}')
+                    .trim()
+                    .into()
+            })
         .unwrap_or_default()
 }
 
+#[cfg(feature="clipboard2")]
+fn get_clipboard(clipboard: &mut SystemClipboard) -> String {
+    clipboard.get_string_contents().unwrap_or_default()
+}
 
 #[derive(StructOpt)]
 #[structopt(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
     #[cfg(feature="x11-clipboard")]
+    #[structopt(short = "x", long = "selection",
+                help = "show explaination of current selection")]
+    selection: bool,
+
+    #[cfg(feature="clipboard2")]
     #[structopt(short = "x", long = "selection",
                 help = "show explaination of current selection")]
     selection: bool,
@@ -106,15 +119,17 @@ fn main() {
 
     let ydcv_options = YdcvOptions::from_args();
 
-    #[cfg(feature="notify-rust")]
-    let notify_enabled = ydcv_options.notify;
-    #[cfg(not(feature="notify-rust"))]
-    let notify_enabled = false;
+    let notify_enabled = if cfg!(feature="notify-rust") || cfg!(feature="winrt-notification") {
+        ydcv_options.notify
+    }else{
+        false
+    };
 
-    #[cfg(feature="x11-clipboard")]
-    let selection_enabled = ydcv_options.selection;
-    #[cfg(not(feature="x11-clipboard"))]
-    let selection_enabled = false;
+    let selection_enabled = if cfg!(feature="x11-clipboard") || cfg!(feature="clipboard2") {
+        ydcv_options.selection
+    }else{
+        false
+    };
 
     let mut client = Client::new();
 
@@ -135,22 +150,22 @@ fn main() {
     };
 
     if ydcv_options.free.is_empty() {
-        if selection_enabled {
+        if selection_enabled && (cfg!(feature="x11-clipboard") || cfg!(feature="clipboard2")){
             #[cfg(feature="x11-clipboard")]
-            {
-                let mut clipboard = Clipboard::new().unwrap();
-                let mut last = get_clipboard(&mut clipboard);
-                last = last.trim().to_string();
-                println!("Waiting for selection> ");
-                loop {
-                    std::thread::sleep(Duration::from_secs(1));
-                    let curr = get_clipboard(&mut clipboard).trim().to_string();
-                    if curr != last {
-                        last = curr.clone();
-                        if !last.is_empty() {
-                            lookup_explain(&mut client, &curr, fmt, ydcv_options.raw);
-                            println!("Waiting for selection> ");
-                        }
+            let mut clipboard = Clipboard::new().unwrap();
+            #[cfg(feature="clipboard2")]
+            let mut clipboard = SystemClipboard::new().unwrap();
+            let mut last = get_clipboard(&mut clipboard);
+            last = last.trim().to_string();
+            println!("Waiting for selection> ");
+            loop {
+                std::thread::sleep(Duration::from_secs(1));
+                let curr = get_clipboard(&mut clipboard).trim().to_string();
+                if curr != last {
+                    last = curr.clone();
+                    if !last.is_empty() {
+                        lookup_explain(&mut client, &curr, fmt, ydcv_options.raw);
+                        println!("Waiting for selection> ");
                     }
                 }
             }

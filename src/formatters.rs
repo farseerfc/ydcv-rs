@@ -2,6 +2,8 @@
 
 #[cfg(feature="notify-rust")]
 use notify_rust::Notification;
+#[cfg(feature="winrt-notification")]
+use winrt_notification::{Duration, Sound, Toast};
 
 macro_rules! def {
     ($($n:ident),*) => { $(
@@ -67,6 +69,13 @@ pub struct HtmlFormatter {
     timeout: i32,
 }
 
+#[cfg(feature="winrt-notification")]
+pub struct HtmlFormatter {
+    notify: bool,
+    notifier: Toast,
+    duration: Duration,
+}
+
 /// HTML-style formatter, suitable for desktop notification
 #[cfg(not(feature="notify-rust"))]
 pub struct HtmlFormatter {}
@@ -81,8 +90,18 @@ impl HtmlFormatter {
         }
     }
 
+    #[cfg(feature="winrt-notification")]
+    pub fn new(notify: bool) -> HtmlFormatter {
+        HtmlFormatter {
+            notify: notify,
+            notifier: Toast::new(Toast::POWERSHELL_APP_ID),
+            duration: Duration::Long,
+        }
+    }
+
 
     #[cfg(not(feature="notify-rust"))]
+    #[cfg(not(feature="winrt-notification"))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter {}
     }
@@ -128,7 +147,23 @@ impl Formatter for HtmlFormatter {
         }
     }
 
+    #[cfg(feature="winrt-notification")]
+    fn print(&mut self, word: &str, body: &str) {
+        if self.notify {
+            self.notifier
+                .title("ydcv")
+                .text1(word)
+                .text2(body)
+                .duration(Duration::Short)
+                .show()
+                .expect("unable to toast");
+        } else {
+            println!("{}", body);
+        }
+    }
+
     #[cfg(not(feature="notify-rust"))]
+    #[cfg(not(feature="winrt-notification"))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
