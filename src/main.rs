@@ -33,8 +33,8 @@ mod ydresponse;
 mod ydclient;
 mod formatters;
 
-use ydclient::YdClient;
-use formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
+use crate::ydclient::YdClient;
+use crate::formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
 
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &mut Formatter, raw: bool) {

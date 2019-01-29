@@ -1,6 +1,6 @@
 //! parser for the returned result from YD
 
-use formatters::Formatter;
+use crate::formatters::Formatter;
 use serde_json::{self, Error as SerdeError};
 
 /// Basic result structure
