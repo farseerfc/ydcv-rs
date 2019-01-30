@@ -84,7 +84,7 @@ struct YdcvOptions {
 
     #[cfg(any(feature="notify-rust", feature="winrt-notification"))]
     #[structopt(short = "n", long = "notify",
-                help = "send desktop notifications (implies -H)")]
+                help = "send desktop notifications (implies -H on X11)")]
     notify: bool,
 
     #[structopt(short = "r", long = "raw",
@@ -139,8 +139,15 @@ fn main() {
 
     let fmt: &mut dyn Formatter = if ydcv_options.html || (notify_enabled && cfg!(feature="notify-rust")){
         &mut html
-    } else if notify_enabled && cfg!(feature="winrt-notification") {
-        &mut win
+    } else if notify_enabled {
+        {
+            #[cfg(feature="winrt-notification")]
+            &mut win
+        }
+        {
+            #[cfg(not(feature="winrt-notification"))]
+            &mut plain
+        }
     } else if ydcv_options.color == "always" ||
               atty::is(atty::Stream::Stdout) && ydcv_options.color != "never" {
         &mut ansi

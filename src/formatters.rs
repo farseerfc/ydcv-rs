@@ -46,12 +46,6 @@ impl Formatter for PlainFormatter {
     }
 }
 
-macro_rules! ignore {
-    ($($n:ident),*) => { $(
-        fn $n (&self, _s: &str) -> String { "".to_owned() }
-    )* }
-}
-
 /// WinFormatter text formatter
 
 #[cfg(feature="winrt-notification")]
@@ -67,6 +61,14 @@ impl WinFormatter {
         }
     }
 }
+
+#[cfg(feature="winrt-notification")]
+macro_rules! ignore {
+    ($($n:ident),*) => { $(
+        fn $n (&self, _s: &str) -> String { "".to_owned() }
+    )* }
+}
+
 
 #[cfg(feature="winrt-notification")]
 impl Formatter for WinFormatter {
