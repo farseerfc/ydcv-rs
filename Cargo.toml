@@ -21,24 +21,20 @@ lazy_static = "^1.2"
 atty = "^0.2"
 reqwest = "^0.9"
 
-[dependencies.notify-rust]
-version = "^3.4"
-optional = true
+[target.'cfg(windows)'.dependencies]
+winrt-notification =    {version = "^0.2", optional = true}
+clipboard2 =            {version = "^0.1", optional = true}
 
-[dependencies.x11-clipboard]
-version = "^0.3"
-optional = true
-
-[dependencies.clipboard2]
-version = "^0.1"
-optional = true
-
-[dependencies.winrt-notification]
-version = "^0.2"
-optional = true
+[target.'cfg(unix)'.dependencies]
+notify-rust =           {version = "^3.4", optional = true}
+x11-clipboard =         {version = "^0.3", optional = true}
 
 [features]
 default = ["notify-rust", "x11-clipboard"]
 
-# on Windows 8.1 and higher:
-#default = ["winrt-notification", "clipboard2"]
+windows = ["winrt-notification", "clipboard2"]
+
+## Cargo.toml don't allow us to write this:
+## https://github.com/rust-lang/cargo/issues/1197#issuecomment-268203727
+# [target.'cfg(windows)'.features]
+# default = ["winrt-notification", "clipboard2"]

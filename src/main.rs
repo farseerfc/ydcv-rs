@@ -126,14 +126,16 @@ fn main() {
     let mut client = Client::new();
 
     let mut html = HtmlFormatter::new(notify_enabled);
-    let mut ansi = AnsiFormatter;
-    let mut plain = PlainFormatter;
+    let mut ansi = AnsiFormatter::new(notify_enabled);
+    let mut plain = PlainFormatter::new(notify_enabled);
 
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
-    let fmt: &mut dyn Formatter = if ydcv_options.html || notify_enabled {
+    let fmt: &mut dyn Formatter = if ydcv_options.html || (notify_enabled && cfg!(feature="notify-rust")){
         &mut html
+    } else if notify_enabled {
+        &mut plain
     } else if ydcv_options.color == "always" ||
               atty::is(atty::Stream::Stdout) && ydcv_options.color != "never" {
         &mut ansi

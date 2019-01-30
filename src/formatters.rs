@@ -24,7 +24,14 @@ pub trait Formatter {
 }
 
 /// Plain text formatter
+#[cfg(not(feature="winrt-notification"))]
 pub struct PlainFormatter;
+
+#[cfg(feature="winrt-notification")]
+pub struct PlainFormatter {
+    notify: bool,
+}
+
 
 macro_rules! plain {
     ($($n:ident),*) => { $(
@@ -32,8 +39,32 @@ macro_rules! plain {
     )* }
 }
 
+impl PlainFormatter {
+    pub fn new(_: bool) -> PlainFormatter {
+        PlainFormatter {}
+    }
+}
+
+
 impl Formatter for PlainFormatter {
     plain!(default, red, yellow, purple, cyan, underline);
+
+    #[cfg(feature="winrt-notification")]
+    fn print(&mut self, word: &str, body: &str) {
+        if self.notify {
+            Toast::new(Toast::POWERSHELL_APP_ID)
+                .title("ydcv")
+                .text1(word)
+                .text2(body)
+                .duration(Duration::Long)
+                .show()
+                .expect("unable to toast");
+        } else {
+            println!("{}", body);
+        }
+    }
+
+    #[cfg(not(feature="winrt-notification"))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
@@ -50,11 +81,19 @@ macro_rules! ansi {
     )* }
 }
 
+impl AnsiFormatter {
+    pub fn new(_: bool) -> AnsiFormatter {
+        AnsiFormatter {}
+    }
+}
+
 impl Formatter for AnsiFormatter {
     ansi!(red = 31, yellow = 33, purple = 35, cyan = 36, underline = 4);
+    
     fn default(&self, s: &str) -> String {
         s.to_owned()
     }
+
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
@@ -69,14 +108,8 @@ pub struct HtmlFormatter {
     timeout: i32,
 }
 
-#[cfg(feature="winrt-notification")]
-pub struct HtmlFormatter {
-    notify: bool,
-}
-
-/// HTML-style formatter, suitable for desktop notification
-#[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
-pub struct HtmlFormatter {}
+#[cfg(not(feature="notify-rust"))]
+pub struct HtmlFormatter;
 
 impl HtmlFormatter {
     #[cfg(feature="notify-rust")]
@@ -88,15 +121,7 @@ impl HtmlFormatter {
         }
     }
 
-    #[cfg(feature="winrt-notification")]
-    pub fn new(notify: bool) -> HtmlFormatter {
-        HtmlFormatter {
-            notify: notify,
-        }
-    }
-
-
-    #[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
+    #[cfg(not(feature="notify-rust"))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter {}
     }
@@ -142,22 +167,7 @@ impl Formatter for HtmlFormatter {
         }
     }
 
-    #[cfg(feature="winrt-notification")]
-    fn print(&mut self, word: &str, body: &str) {
-        if self.notify {
-            Toast::new(Toast::POWERSHELL_APP_ID)
-                .title("ydcv")
-                .text1(word)
-                .text2(body)
-                .duration(Duration::Long)
-                .show()
-                .expect("unable to toast");
-        } else {
-            println!("{}", body);
-        }
-    }
-
-    #[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
+    #[cfg(not(feature="notify-rust"))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
