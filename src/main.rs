@@ -140,12 +140,13 @@ fn main() {
     let fmt: &mut dyn Formatter = if ydcv_options.html || (notify_enabled && cfg!(feature="notify-rust")){
         &mut html
     } else if notify_enabled {
+        #[cfg(feature="winrt-notification")]
         {
-            #[cfg(feature="winrt-notification")]
             &mut win
         }
+        #[cfg(not(feature="winrt-notification"))]
         {
-            #[cfg(not(feature="winrt-notification"))]
+           
             &mut plain
         }
     } else if ydcv_options.color == "always" ||
