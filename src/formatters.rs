@@ -24,14 +24,7 @@ pub trait Formatter {
 }
 
 /// Plain text formatter
-#[cfg(not(feature="winrt-notification"))]
 pub struct PlainFormatter;
-
-#[cfg(feature="winrt-notification")]
-pub struct PlainFormatter {
-    notify: bool,
-}
-
 
 macro_rules! plain {
     ($($n:ident),*) => { $(
@@ -45,28 +38,57 @@ impl PlainFormatter {
     }
 }
 
-
 impl Formatter for PlainFormatter {
     plain!(default, red, yellow, purple, cyan, underline);
+    
+    fn print(&mut self, _: &str, body: &str) {
+        println!("{}", body);
+    }
+}
 
-    #[cfg(feature="winrt-notification")]
-    fn print(&mut self, word: &str, body: &str) {
+macro_rules! ignore {
+    ($($n:ident),*) => { $(
+        fn $n (&self, _s: &str) -> String { "".to_owned() }
+    )* }
+}
+
+/// WinFormatter text formatter
+
+#[cfg(feature="winrt-notification")]
+pub struct WinFormatter {
+    notify: bool,
+}
+
+#[cfg(feature="winrt-notification")]
+impl WinFormatter {
+    pub fn new(notify: bool) -> WinFormatter {
+        WinFormatter {
+            notify: notify,
+        }
+    }
+}
+
+#[cfg(feature="winrt-notification")]
+impl Formatter for WinFormatter {
+    plain!(default, red, yellow, purple, underline);
+    ignore!(cyan);
+
+    fn print(&mut self, _word: &str, body: &str) {
         if self.notify {
+            // windows notification has limited lines
+            // so we display as little as possible
+            let lines:Vec<&str> = body.split('\n')
+                .filter(|x| x.len() > 0)
+                .collect();
             Toast::new(Toast::POWERSHELL_APP_ID)
-                .title("ydcv")
-                .text1(word)
-                .text2(body)
+                .title(lines[0])
+                .text1(&lines[1..].join("\n"))
                 .duration(Duration::Long)
                 .show()
-                .expect("unable to toast");
+                .expect("ydcv: unable to toast");
         } else {
             println!("{}", body);
         }
-    }
-
-    #[cfg(not(feature="winrt-notification"))]
-    fn print(&mut self, _: &str, body: &str) {
-        println!("{}", body);
     }
 }
 
@@ -205,7 +227,7 @@ mod tests {
                              Client::new()
                                  .decode_result(RAW_FELIX)
                                  .unwrap()
-                                 .explain(&AnsiFormatter));
+                                 .explain(&AnsiFormatter::new(false)));
         assert_eq!("
 \x1b[4mFelix\x1b[0m [\x1b[33m'fi:liks\x1b[0m] 费利克斯
 \x1b[36m  Word Explanation:\x1b[0m
@@ -227,7 +249,7 @@ mod tests {
                              Client::new()
                                  .decode_result(RAW_FELIX)
                                  .unwrap()
-                                 .explain(&PlainFormatter));
+                                 .explain(&PlainFormatter::new(false)));
         assert_eq!("
 Felix ['fi:liks] 费利克斯
   Word Explanation:

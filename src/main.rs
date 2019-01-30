@@ -31,6 +31,8 @@ mod formatters;
 
 use crate::ydclient::YdClient;
 use crate::formatters::{Formatter, PlainFormatter, AnsiFormatter, HtmlFormatter};
+#[cfg(feature="winrt-notification")]
+use crate::formatters::WinFormatter;
 
 
 fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw: bool) {
@@ -128,14 +130,17 @@ fn main() {
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter::new(notify_enabled);
     let mut plain = PlainFormatter::new(notify_enabled);
+    #[cfg(feature="winrt-notification")]
+    let mut win = WinFormatter::new(notify_enabled);
+    
 
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
     let fmt: &mut dyn Formatter = if ydcv_options.html || (notify_enabled && cfg!(feature="notify-rust")){
         &mut html
-    } else if notify_enabled {
-        &mut plain
+    } else if notify_enabled && cfg!(feature="winrt-notification") {
+        &mut win
     } else if ydcv_options.color == "always" ||
               atty::is(atty::Stream::Stdout) && ydcv_options.color != "never" {
         &mut ansi
