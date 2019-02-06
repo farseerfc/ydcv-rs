@@ -14,8 +14,6 @@ extern crate lazy_static;
 
 use env_logger;
 
-#[cfg(any(feature="x11-clipboard", feature="clipboard2"))]
-use std::time::Duration;
 #[cfg(feature="x11-clipboard")]
 use x11_clipboard::Clipboard;
 #[cfg(feature="clipboard2")]
@@ -47,22 +45,6 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw:
             Err(err) => fmt.print(word, &format!("Error looking-up word {}: {:?}", word, err)),
         }
     }
-}
-
-#[cfg(feature="x11-clipboard")]
-fn get_clipboard(clipboard: &mut Clipboard) -> String {
-    clipboard
-        .load(clipboard.getter.atoms.primary,
-            clipboard.getter.atoms.utf8_string,
-            clipboard.getter.atoms.property,
-            Duration::from_secs(3))
-        .map(|val| {
-                String::from_utf8_lossy(&val)
-                    .trim_matches('\u{0}')
-                    .trim()
-                    .into()
-            })
-        .unwrap_or_default()
 }
 
 #[cfg(feature="clipboard2")]
@@ -118,13 +100,13 @@ fn main() {
     let notify_enabled = ydcv_options.notify;
     #[cfg(not(any(feature="notify-rust", feature="winrt-notification")))]
     let notify_enabled = false;
-    
+
 
     #[cfg(any(feature="x11-clipboard", feature="clipboard2"))]
     let selection_enabled = ydcv_options.selection;
     #[cfg(not(any(feature="x11-clipboard", feature="clipboard2")))]
     let selection_enabled = false;
-    
+
     let mut client = Client::new();
 
     let mut html = HtmlFormatter::new(notify_enabled);
@@ -132,7 +114,7 @@ fn main() {
     let mut plain = PlainFormatter::new(notify_enabled);
     #[cfg(feature="winrt-notification")]
     let mut win = WinFormatter::new(notify_enabled);
-    
+
 
     #[cfg(feature="notify-rust")]
     html.set_timeout(ydcv_options.timeout * 1000);
@@ -146,7 +128,7 @@ fn main() {
         }
         #[cfg(not(feature="winrt-notification"))]
         {
-           
+
             &mut plain
         }
     } else if ydcv_options.color == "always" ||
@@ -158,17 +140,40 @@ fn main() {
 
     if ydcv_options.free.is_empty() {
         if selection_enabled {
-            #[cfg(any(feature="x11-clipboard", feature="clipboard2"))]
+            #[cfg(feature="x11-clipboard")]
             {
-                #[cfg(feature="x11-clipboard")]
-                let mut clipboard = Clipboard::new().unwrap();
-                #[cfg(feature="clipboard2")]
+                let clipboard = Clipboard::new().unwrap();
+                let mut last = String::new();
+
+                println!("Waiting for selection> ");
+
+                loop {
+                    if let Ok(curr) = clipboard.load_wait(
+                        clipboard.getter.atoms.primary,
+                        clipboard.getter.atoms.utf8_string,
+                        clipboard.getter.atoms.property
+                    ) {
+                        let curr = String::from_utf8_lossy(&curr);
+                        let curr = curr
+                            .trim_matches('\u{0}')
+                            .trim();
+                        if !curr.is_empty() && last != curr {
+                            last = curr.to_owned();
+                            lookup_explain(&mut client, curr, fmt, ydcv_options.raw);
+                            println!("Waiting for selection> ");
+                        }
+                    }
+                }
+            }
+
+            #[cfg(feature="clipboard2")]
+            {
                 let mut clipboard = SystemClipboard::new().unwrap();
                 let mut last = get_clipboard(&mut clipboard);
                 last = last.trim().to_string();
                 println!("Waiting for selection> ");
                 loop {
-                    std::thread::sleep(Duration::from_secs(1));
+                    std::thread::sleep(std::time::Duration::from_secs(1));
                     let curr = get_clipboard(&mut clipboard).trim().to_string();
                     if curr != last {
                         last = curr.clone();
