@@ -188,7 +188,7 @@ fn main() {
             let mut reader = Editor::<()>::new();
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
-                reader.add_history_entry(word.as_ref());
+                reader.add_history_entry(word);
                 if !word.is_empty() {
                     lookup_explain(&mut client, &word, fmt, ydcv_options.raw);
                 }
