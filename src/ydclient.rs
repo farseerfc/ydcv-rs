@@ -55,7 +55,7 @@ impl YdClient for Client {
                            ("doctype", "json"),
                            ("version", "1.1"),
                            ("q", word)]
-                                  .into_iter());
+                                  .iter());
         let mut body = String::new();
         self.get(url)
             // .header(Connection::close())
