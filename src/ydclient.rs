@@ -11,10 +11,14 @@ use super::ydresponse::YdResponse;
 
 lazy_static! {
     /// API name
-    static ref API: String = var("YDCV_API_NAME").unwrap_or_else(|_| String::from("ydcv-rs"));
+    static ref API: String = var("YDCV_API_NAME")
+        .unwrap_or_else(|_| var("YDCV_YOUDAO_APPID")
+        .unwrap_or_else(|_| String::from("ydcv-rs")));
 
     /// API key
-    static ref API_KEY: String = var("YDCV_API_KEY").unwrap_or_else(|_| String::from("1323298384"));
+    static ref API_KEY: String = var("YDCV_API_KEY")
+        .unwrap_or_else(|_| var("YDCV_YOUDAO_APPSEC")
+        .unwrap_or_else(|_| String::from("1323298384")));
 }
 
 /// Wrapper trait on `reqwest::Client`
