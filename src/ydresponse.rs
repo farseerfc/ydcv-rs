@@ -30,9 +30,8 @@ pub struct YdResponse {
     web: Option<Vec<YdWeb>>,
 }
 
-
 impl YdResponse {
-    pub fn new_raw(result: String) -> Result<YdResponse,SerdeError> {
+    pub fn new_raw(result: String) -> Result<YdResponse, SerdeError> {
         serde_json::from_str(&result)
     }
 
@@ -40,8 +39,9 @@ impl YdResponse {
     pub fn explain(&self, fmt: &dyn Formatter) -> String {
         let mut result: Vec<String> = vec![];
 
-        if self.error_code != 0 ||
-           self.basic.is_none() && self.web.is_none() && self.translation.is_none() {
+        if self.error_code != 0
+            || self.basic.is_none() && self.web.is_none() && self.translation.is_none()
+        {
             result.push(fmt.red(" -- No result for this query."));
             return result.join("\n");
         }
@@ -55,10 +55,13 @@ impl YdResponse {
 
         let phonetic = if let Some(ref basic) = self.basic {
             if let (Some(us_phonetic), Some(uk_phonetic)) =
-                (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref()) {
-                format!(" UK: [{}], US: [{}]",
-                        fmt.yellow(uk_phonetic),
-                        fmt.yellow(us_phonetic))
+                (basic.us_phonetic.as_ref(), basic.uk_phonetic.as_ref())
+            {
+                format!(
+                    " UK: [{}], US: [{}]",
+                    fmt.yellow(uk_phonetic),
+                    fmt.yellow(us_phonetic)
+                )
             } else if let Some(ref phonetic) = basic.phonetic {
                 format!("[{}]", fmt.yellow(phonetic))
             } else {
@@ -68,13 +71,18 @@ impl YdResponse {
             "".to_owned()
         };
 
-        result.push(format!("{} {} {}",
-                            fmt.underline(&self.query),
-                            phonetic,
-                            fmt.default(&self.translation
-                                             .as_ref()
-                                             .map(|v| v.join("; "))
-                                             .unwrap_or_default())));
+        result.push(format!(
+            "{} {} {}",
+            fmt.underline(&self.query),
+            phonetic,
+            fmt.default(
+                &self
+                    .translation
+                    .as_ref()
+                    .map(|v| v.join("; "))
+                    .unwrap_or_default()
+            )
+        ));
 
         if let Some(ref basic) = self.basic {
             if !basic.explains.is_empty() {
@@ -90,12 +98,15 @@ impl YdResponse {
                 result.push(fmt.cyan("  Web Reference:"));
                 for item in web {
                     result.push("     * ".to_owned() + &fmt.yellow(&item.key));
-                    result.push("       ".to_owned() +
-                                &item.value
-                                     .iter()
-                                     .map(|x| fmt.purple(x))
-                                     .collect::<Vec<_>>()
-                                     .join("；"));
+                    result.push(
+                        "       ".to_owned()
+                            + &item
+                                .value
+                                .iter()
+                                .map(|x| fmt.purple(x))
+                                .collect::<Vec<_>>()
+                                .join("；"),
+                    );
                 }
             }
         }

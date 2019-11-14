@@ -1,8 +1,8 @@
 //! Formatters used by `YdResponse::explain`
 
-#[cfg(feature="notify-rust")]
+#[cfg(feature = "notify-rust")]
 use notify_rust::Notification;
-#[cfg(feature="winrt-notification")]
+#[cfg(feature = "winrt-notification")]
 use winrt_notification::{Duration, Toast};
 
 macro_rules! def {
@@ -40,7 +40,7 @@ impl PlainFormatter {
 
 impl Formatter for PlainFormatter {
     plain!(default, red, yellow, purple, cyan, underline);
-    
+
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
@@ -48,29 +48,26 @@ impl Formatter for PlainFormatter {
 
 /// WinFormatter text formatter
 
-#[cfg(feature="winrt-notification")]
+#[cfg(feature = "winrt-notification")]
 pub struct WinFormatter {
     notify: bool,
 }
 
-#[cfg(feature="winrt-notification")]
+#[cfg(feature = "winrt-notification")]
 impl WinFormatter {
     pub fn new(notify: bool) -> WinFormatter {
-        WinFormatter {
-            notify: notify,
-        }
+        WinFormatter { notify: notify }
     }
 }
 
-#[cfg(feature="winrt-notification")]
+#[cfg(feature = "winrt-notification")]
 macro_rules! ignore {
     ($($n:ident),*) => { $(
         fn $n (&self, _s: &str) -> String { "".to_owned() }
     )* }
 }
 
-
-#[cfg(feature="winrt-notification")]
+#[cfg(feature = "winrt-notification")]
 impl Formatter for WinFormatter {
     plain!(default, red, yellow, purple, underline);
     ignore!(cyan);
@@ -79,9 +76,7 @@ impl Formatter for WinFormatter {
         if self.notify {
             // windows notification has limited lines
             // so we display as little as possible
-            let lines:Vec<&str> = body.split('\n')
-                .filter(|x| x.len() > 0)
-                .collect();
+            let lines: Vec<&str> = body.split('\n').filter(|x| x.len() > 0).collect();
             Toast::new(Toast::POWERSHELL_APP_ID)
                 .title(lines[0])
                 .text1(&lines[1..].join("\n"))
@@ -113,7 +108,7 @@ impl AnsiFormatter {
 
 impl Formatter for AnsiFormatter {
     ansi!(red = 31, yellow = 33, purple = 35, cyan = 36, underline = 4);
-    
+
     fn default(&self, s: &str) -> String {
         s.to_owned()
     }
@@ -123,20 +118,19 @@ impl Formatter for AnsiFormatter {
     }
 }
 
-
 /// HTML-style formatter, suitable for desktop notification
-#[cfg(feature="notify-rust")]
+#[cfg(feature = "notify-rust")]
 pub struct HtmlFormatter {
     notify: bool,
     notifier: Notification,
     timeout: i32,
 }
 
-#[cfg(not(feature="notify-rust"))]
+#[cfg(not(feature = "notify-rust"))]
 pub struct HtmlFormatter;
 
 impl HtmlFormatter {
-    #[cfg(feature="notify-rust")]
+    #[cfg(feature = "notify-rust")]
     pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter {
             notify: notify,
@@ -145,12 +139,12 @@ impl HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature="notify-rust"))]
+    #[cfg(not(feature = "notify-rust"))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter {}
     }
 
-    #[cfg(feature="notify-rust")]
+    #[cfg(feature = "notify-rust")]
     pub fn set_timeout(&mut self, timeout: i32) {
         self.timeout = timeout;
     }
@@ -165,10 +159,12 @@ macro_rules! html {
 }
 
 impl Formatter for HtmlFormatter {
-    html!(red = "red",
-          yellow = "goldenrod",
-          purple = "purple",
-          cyan = "navy");
+    html!(
+        red = "red",
+        yellow = "goldenrod",
+        purple = "purple",
+        cyan = "navy"
+    );
     fn underline(&self, s: &str) -> String {
         format!(r#"<u>{}</u>"#, s)
     }
@@ -176,7 +172,7 @@ impl Formatter for HtmlFormatter {
         s.to_string()
     }
 
-    #[cfg(feature="notify-rust")]
+    #[cfg(feature = "notify-rust")]
     fn print(&mut self, word: &str, body: &str) {
         if self.notify {
             self.notifier
@@ -191,18 +187,17 @@ impl Formatter for HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature="notify-rust"))]
+    #[cfg(not(feature = "notify-rust"))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }
 }
 
-
 #[cfg(test)]
 mod tests {
+    use crate::formatters::{AnsiFormatter, HtmlFormatter, PlainFormatter};
     use crate::ydclient::*;
     use reqwest::Client;
-    use crate::formatters::{AnsiFormatter, PlainFormatter, HtmlFormatter};
 
     static RAW_FELIX: &'static str = r#"
     {
@@ -222,15 +217,17 @@ mod tests {
         ]
     }"#;
 
-
     #[test]
     fn test_explain_ansi() {
-        let result = format!("\n{}\n",
-                             Client::new()
-                                 .decode_result(RAW_FELIX)
-                                 .unwrap()
-                                 .explain(&AnsiFormatter::new(false)));
-        assert_eq!("
+        let result = format!(
+            "\n{}\n",
+            Client::new()
+                .decode_result(RAW_FELIX)
+                .unwrap()
+                .explain(&AnsiFormatter::new(false))
+        );
+        assert_eq!(
+            "
 \x1b[4mFelix\x1b[0m [\x1b[33m'fi:liks\x1b[0m] 费利克斯
 \x1b[36m  Word Explanation:\x1b[0m
      * n. 菲力克斯（男子名）；费力克斯制导炸弹
@@ -242,17 +239,21 @@ mod tests {
      * \x1b[33mFelix Bloch\x1b[0m
        \x1b[35m费利克斯·布洛赫\x1b[0m；\x1b[35m布洛赫\x1b[0m；\x1b[35m傅里克\x1b[0m
 ",
-                   result);
+            result
+        );
     }
 
     #[test]
     fn test_explain_plain() {
-        let result = format!("\n{}\n",
-                             Client::new()
-                                 .decode_result(RAW_FELIX)
-                                 .unwrap()
-                                 .explain(&PlainFormatter::new(false)));
-        assert_eq!("
+        let result = format!(
+            "\n{}\n",
+            Client::new()
+                .decode_result(RAW_FELIX)
+                .unwrap()
+                .explain(&PlainFormatter::new(false))
+        );
+        assert_eq!(
+            "
 Felix ['fi:liks] 费利克斯
   Word Explanation:
      * n. 菲力克斯（男子名）；费力克斯制导炸弹
@@ -264,12 +265,14 @@ Felix ['fi:liks] 费利克斯
      * Felix Bloch
        费利克斯·布洛赫；布洛赫；傅里克
 ",
-                   result);
+            result
+        );
     }
 
     #[test]
     fn test_explain_html_0() {
-        assert_eq!(r#"
+        assert_eq!(
+            r#"
 <u>Felix</u> [<span color="goldenrod">'fi:liks</span>] 费利克斯
 <span color="navy">  Word Explanation:</span>
      * n. 菲力克斯（男子名）；费力克斯制导炸弹
@@ -280,25 +283,33 @@ Felix ['fi:liks] 费利克斯
        <span color="purple">菲利克斯·马加特</span>；<span color="purple">马加特</span>；<span color="purple">菲利斯·马加夫</span>
      * <span color="goldenrod">Felix Bloch</span>
        <span color="purple">费利克斯·布洛赫</span>；<span color="purple">布洛赫</span>；<span color="purple">傅里克</span>
-"#,format!("\n{}\n",
-    Client::new()
-        .decode_result(RAW_FELIX).unwrap()
-        .explain(&HtmlFormatter::new(false))));
+"#,
+            format!(
+                "\n{}\n",
+                Client::new()
+                    .decode_result(RAW_FELIX)
+                    .unwrap()
+                    .explain(&HtmlFormatter::new(false))
+            )
+        );
     }
 
     #[test]
     fn test_explain_html_1() {
-        let result = format!("\n{}\n",
-                             Client::new()
-                                 .lookup_word("asdakda", false)
-                                 .unwrap()
-                                 .explain(&HtmlFormatter::new(false)));
-        assert_eq!(r#"
+        let result = format!(
+            "\n{}\n",
+            Client::new()
+                .lookup_word("asdakda", false)
+                .unwrap()
+                .explain(&HtmlFormatter::new(false))
+        );
+        assert_eq!(
+            r#"
 <u>asdakda</u>
 <span color="navy">  Translation:</span>
     asdakda
 "#,
-                   result);
+            result
+        );
     }
-
 }

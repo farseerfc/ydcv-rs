@@ -1,13 +1,12 @@
 //! ydclient is client wrapper for Client
 
+use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use std::error::Error;
-use serde_json::{self, Error as SerdeError};
 // use reqwest::header::Connection;
-use reqwest::Url;
-use crate::Client;
 use super::ydresponse::YdResponse;
-
+use crate::Client;
+use reqwest::Url;
 
 lazy_static! {
     /// API name
@@ -40,10 +39,12 @@ pub trait YdClient {
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
-        debug!("Recieved JSON {}",
-               serde_json::from_str::<YdResponse>(result)
-                   .and_then(|v| serde_json::to_string_pretty(&v))
-                   .unwrap());
+        debug!(
+            "Recieved JSON {}",
+            serde_json::from_str::<YdResponse>(result)
+                .and_then(|v| serde_json::to_string_pretty(&v))
+                .unwrap()
+        );
         serde_json::from_str(result)
     }
 
@@ -52,14 +53,17 @@ impl YdClient for Client {
         use std::io::Read;
 
         let mut url = Url::parse("https://fanyi.youdao.com/openapi.do")?;
-        url.query_pairs_mut()
-            .extend_pairs([("keyfrom", API.as_str()),
-                           ("key", API_KEY.as_str()),
-                           ("type", "data"),
-                           ("doctype", "json"),
-                           ("version", "1.1"),
-                           ("q", word)]
-                                  .iter());
+        url.query_pairs_mut().extend_pairs(
+            [
+                ("keyfrom", API.as_str()),
+                ("key", API_KEY.as_str()),
+                ("type", "data"),
+                ("doctype", "json"),
+                ("version", "1.1"),
+                ("q", word),
+            ]
+            .iter(),
+        );
         let mut body = String::new();
         self.get(url)
             // .header(Connection::close())
@@ -70,8 +74,7 @@ impl YdClient for Client {
         if raw {
             raw_result.map_err(Into::into)
         } else {
-            self.decode_result(&body)
-                .map_err(Into::into)
+            self.decode_result(&body).map_err(Into::into)
         }
     }
 }
@@ -83,22 +86,25 @@ mod tests {
 
     #[test]
     fn test_lookup_word_0() {
-        assert_eq!("YdResponse('hello')",
-                   format!("{}",
-                           Client::new().lookup_word("hello", false).unwrap()));
+        assert_eq!(
+            "YdResponse('hello')",
+            format!("{}", Client::new().lookup_word("hello", false).unwrap())
+        );
     }
 
     #[test]
     fn test_lookup_word_1() {
-        assert_eq!("YdResponse('world')",
-                   format!("{}",
-                           Client::new().lookup_word("world", false).unwrap()));
+        assert_eq!(
+            "YdResponse('world')",
+            format!("{}", Client::new().lookup_word("world", false).unwrap())
+        );
     }
 
     #[test]
     fn test_lookup_word_2() {
-        assert_eq!("YdResponse('<+*>?_')",
-                   format!("{}",
-                           Client::new().lookup_word("<+*>?_", false).unwrap()));
+        assert_eq!(
+            "YdResponse('<+*>?_')",
+            format!("{}", Client::new().lookup_word("<+*>?_", false).unwrap())
+        );
     }
 }
