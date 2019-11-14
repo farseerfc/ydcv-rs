@@ -20,11 +20,11 @@ pub struct YdWeb {
 }
 
 /// Full response structure
-#[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct YdResponse {
     query: String,
-    errorCode: i32,
+    error_code: i32,
     translation: Option<Vec<String>>,
     basic: Option<YdBasic>,
     web: Option<Vec<YdWeb>>,
@@ -40,7 +40,7 @@ impl YdResponse {
     pub fn explain(&self, fmt: &dyn Formatter) -> String {
         let mut result: Vec<String> = vec![];
 
-        if self.errorCode != 0 ||
+        if self.error_code != 0 ||
            self.basic.is_none() && self.web.is_none() && self.translation.is_none() {
             result.push(fmt.red(" -- No result for this query."));
             return result.join("\n");
