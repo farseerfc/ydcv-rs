@@ -1846,7 +1846,7 @@ dependencies = [
 
 [[package]]
 name = "ydcv-rs"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "atty 0.2.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "clipboard2 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
