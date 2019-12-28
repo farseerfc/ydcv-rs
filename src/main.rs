@@ -14,9 +14,12 @@ extern crate lazy_static;
 
 use env_logger;
 
-#[cfg(feature = "clipboard2")]
+#[cfg(windows)]
+#[cfg(feature = "clipboard")]
 use clipboard2::{Clipboard, SystemClipboard};
-#[cfg(feature = "x11-clipboard")]
+
+#[cfg(unix)]
+#[cfg(feature = "clipboard")]
 use x11_clipboard::Clipboard;
 
 use reqwest::{Client, ClientBuilder};
@@ -27,7 +30,8 @@ mod formatters;
 mod ydclient;
 mod ydresponse;
 
-#[cfg(feature = "winrt-notification")]
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 use crate::formatters::WinFormatter;
 use crate::formatters::{AnsiFormatter, Formatter, HtmlFormatter, PlainFormatter};
 use crate::ydclient::YdClient;
@@ -49,7 +53,8 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw:
     }
 }
 
-#[cfg(feature = "clipboard2")]
+#[cfg(windows)]
+#[cfg(feature = "clipboard")]
 fn get_clipboard(clipboard: &mut SystemClipboard) -> String {
     clipboard.get_string_contents().unwrap_or_default()
 }
@@ -57,7 +62,7 @@ fn get_clipboard(clipboard: &mut SystemClipboard) -> String {
 #[derive(StructOpt)]
 #[structopt(name = "ydcv", about = "A Rust version of ydcv")]
 struct YdcvOptions {
-    #[cfg(any(feature = "x11-clipboard", feature = "clipboard2"))]
+    #[cfg(feature = "clipboard")]
     #[structopt(
         short = "x",
         long = "selection",
@@ -68,7 +73,7 @@ struct YdcvOptions {
     #[structopt(short = "H", long = "html", help = "HTML-style output")]
     html: bool,
 
-    #[cfg(any(feature = "notify-rust", feature = "winrt-notification"))]
+    #[cfg(feature = "notify")]
     #[structopt(
         short = "n",
         long = "notify",
@@ -93,7 +98,8 @@ struct YdcvOptions {
     )]
     color: String,
 
-    #[cfg(feature = "notify-rust")]
+    #[cfg(unix)]
+    #[cfg(feature = "notify")]
     #[structopt(
         short = "t",
         long = "timeout",
@@ -111,14 +117,15 @@ fn main() {
 
     let ydcv_options = YdcvOptions::from_args();
 
-    #[cfg(any(feature = "notify-rust", feature = "winrt-notification"))]
+    #[cfg(feature = "notify")]
     let notify_enabled = ydcv_options.notify;
-    #[cfg(not(any(feature = "notify-rust", feature = "winrt-notification")))]
+    #[cfg(not(feature = "notify"))]
     let notify_enabled = false;
 
-    #[cfg(any(feature = "x11-clipboard", feature = "clipboard2"))]
+    #[cfg(feature = "clipboard")]
     let selection_enabled = ydcv_options.selection;
-    #[cfg(not(any(feature = "x11-clipboard", feature = "clipboard2")))]
+
+    #[cfg(not(feature = "clipboard"))]
     let selection_enabled = false;
 
     let mut client = ClientBuilder::new().use_sys_proxy().build().unwrap();
@@ -126,21 +133,23 @@ fn main() {
     let mut html = HtmlFormatter::new(notify_enabled);
     let mut ansi = AnsiFormatter::new(notify_enabled);
     let mut plain = PlainFormatter::new(notify_enabled);
-    #[cfg(feature = "winrt-notification")]
+    #[cfg(windows)]
+    #[cfg(feature = "notify")]
     let mut win = WinFormatter::new(notify_enabled);
 
-    #[cfg(feature = "notify-rust")]
+    #[cfg(unix)]
+    #[cfg(feature = "notify")]
     html.set_timeout(ydcv_options.timeout * 1000);
 
     let fmt: &mut dyn Formatter =
-        if ydcv_options.html || (notify_enabled && cfg!(feature = "notify-rust")) {
+        if ydcv_options.html || (notify_enabled && cfg!(unix) && cfg!(feature = "notify")) {
             &mut html
         } else if notify_enabled {
-            #[cfg(feature = "winrt-notification")]
+            #[cfg(all(windows, feature = "notify"))]
             {
                 &mut win
             }
-            #[cfg(not(feature = "winrt-notification"))]
+            #[cfg(not(all(windows, feature = "notify")))]
             {
                 &mut plain
             }
@@ -154,7 +163,8 @@ fn main() {
 
     if ydcv_options.free.is_empty() {
         if selection_enabled {
-            #[cfg(feature = "x11-clipboard")]
+            #[cfg(unix)]
+            #[cfg(feature = "clipboard")]
             {
                 let clipboard = Clipboard::new().unwrap();
                 let mut last = String::new();
@@ -178,7 +188,8 @@ fn main() {
                 }
             }
 
-            #[cfg(feature = "clipboard2")]
+            #[cfg(windows)]
+            #[cfg(feature = "clipboard")]
             {
                 let mut clipboard = SystemClipboard::new().unwrap();
                 let mut last = get_clipboard(&mut clipboard);

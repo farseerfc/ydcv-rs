@@ -1,8 +1,11 @@
 //! Formatters used by `YdResponse::explain`
 
-#[cfg(feature = "notify-rust")]
+#[cfg(unix)]
+#[cfg(feature = "notify")]
 use notify_rust::Notification;
-#[cfg(feature = "winrt-notification")]
+
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 use winrt_notification::{Duration, Toast};
 
 macro_rules! def {
@@ -48,26 +51,30 @@ impl Formatter for PlainFormatter {
 
 /// WinFormatter text formatter
 
-#[cfg(feature = "winrt-notification")]
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 pub struct WinFormatter {
     notify: bool,
 }
 
-#[cfg(feature = "winrt-notification")]
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 impl WinFormatter {
     pub fn new(notify: bool) -> WinFormatter {
         WinFormatter { notify: notify }
     }
 }
 
-#[cfg(feature = "winrt-notification")]
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 macro_rules! ignore {
     ($($n:ident),*) => { $(
         fn $n (&self, _s: &str) -> String { "".to_owned() }
     )* }
 }
 
-#[cfg(feature = "winrt-notification")]
+#[cfg(windows)]
+#[cfg(feature = "notify")]
 impl Formatter for WinFormatter {
     plain!(default, red, yellow, purple, underline);
     ignore!(cyan);

@@ -9,12 +9,11 @@ authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-structopt = "^0.2"
-structopt-derive = "^0.2"
+structopt = "^0.3"
 serde = "^1.0"
 serde_derive = "^1.0"
 serde_json = "^1.0"
-env_logger = "^0.6"
+env_logger = "^0.7"
 rustyline = "^5.0"
 log = "^0.4"
 lazy_static = "^1.2"
@@ -27,14 +26,9 @@ clipboard2 =            {version = "^0.1", optional = true}
 
 [target.'cfg(unix)'.dependencies]
 notify-rust =           {version = "^3.4", optional = true}
-x11-clipboard =         {version = "^0.3", optional = true}
+x11-clipboard =         {version = "^0.5", optional = true}
 
 [features]
-default = ["notify-rust", "x11-clipboard"]
-
-windows = ["winrt-notification", "clipboard2"]
-
-## Cargo.toml don't allow us to write this:
-## https://github.com/rust-lang/cargo/issues/1197#issuecomment-268203727
-# [target.'cfg(windows)'.features]
-# default = ["winrt-notification", "clipboard2"]
+default = [ "notify", "clipboard" ]
+notify = ["notify-rust", "winrt-notification"]
+clipboard = ["x11-clipboard", "clipboard2"]
