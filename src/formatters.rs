@@ -8,6 +8,9 @@ use notify_rust::Notification;
 #[cfg(feature = "notify")]
 use winrt_notification::{Duration, Toast};
 
+extern crate htmlescape;
+use htmlescape::encode_minimal;
+
 macro_rules! def {
     ($($n:ident),*) => { $(
         fn $n (&self, s: &str) -> String;
@@ -61,7 +64,7 @@ pub struct WinFormatter {
 #[cfg(feature = "notify")]
 impl WinFormatter {
     pub fn new(notify: bool) -> WinFormatter {
-        WinFormatter { notify: notify }
+        WinFormatter { notify }
     }
 }
 
@@ -140,7 +143,7 @@ impl HtmlFormatter {
     #[cfg(feature = "notify-rust")]
     pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter {
-            notify: notify,
+            notify,
             notifier: Notification::new(),
             timeout: 30000,
         }
@@ -160,7 +163,7 @@ impl HtmlFormatter {
 macro_rules! html {
     ($( $n:ident = $x:expr ),*) => { $(
         fn $n (&self, s: &str) -> String {
-            format!(r#"<span color="{}">{}</span>"#, $x, s)
+            format!(r#"<span color="{}">{}</span>"#, $x, encode_minimal(s))
         }
     )* }
 }
@@ -173,10 +176,10 @@ impl Formatter for HtmlFormatter {
         cyan = "navy"
     );
     fn underline(&self, s: &str) -> String {
-        format!(r#"<u>{}</u>"#, s)
+        format!(r#"<u>{}</u>"#, encode_minimal(s))
     }
     fn default(&self, s: &str) -> String {
-        s.to_string()
+        encode_minimal(s)
     }
 
     #[cfg(feature = "notify-rust")]
@@ -280,7 +283,7 @@ Felix ['fi:liks] 费利克斯
     fn test_explain_html_0() {
         assert_eq!(
             r#"
-<u>Felix</u> [<span color="goldenrod">'fi:liks</span>] 费利克斯
+<u>Felix</u> [<span color="goldenrod">&#x27;fi:liks</span>] 费利克斯
 <span color="navy">  Word Explanation:</span>
      * n. 菲力克斯（男子名）；费力克斯制导炸弹
 <span color="navy">  Web Reference:</span>
@@ -315,6 +318,35 @@ Felix ['fi:liks] 费利克斯
 <u>asdakda</u>
 <span color="navy">  Translation:</span>
     asdakda
+"#,
+            result
+        );
+    }
+
+    #[test]
+    fn test_explain_html_2() {
+        let result = format!(
+            "\n{}\n",
+            Client::new()
+                .lookup_word("comment", false)
+                .unwrap()
+                .explain(&HtmlFormatter::new(false))
+        );
+        assert_eq!(
+            r#"
+<u>comment</u> [<span color="goldenrod">ˈkɒment</span>] 评论
+<span color="navy">  Word Explanation:</span>
+     * n. 评论；意见；批评；描述；&lt;古&gt;注释；[计算机]注解
+     * vt. 发表评论；发表意见；[计算机]注解，把……转成注解
+     * vi. 为……作评语
+     * n. （Comment）（美、瑞、法）科门特 （人名）
+<span color="navy">  Web Reference:</span>
+     * <span color="goldenrod">Comment</span>
+       <span color="purple">评论</span>；<span color="purple">注释</span>；<span color="purple">注解</span>
+     * <span color="goldenrod">Fair comment</span>
+       <span color="purple">公正评论</span>；<span color="purple">公允评论</span>；<span color="purple">合理评论</span>
+     * <span color="goldenrod">comment on</span>
+       <span color="purple">评论</span>；<span color="purple">评议是非</span>；<span color="purple">对</span>
 "#,
             result
         );

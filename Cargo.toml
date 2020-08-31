@@ -4,7 +4,7 @@ description = "A rust version of YouDao Console Version"
 repository = "https://github.com/farseerfc/ydcv-rs"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.4.5"
+version = "0.4.6"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 edition = "2018"
 
@@ -18,6 +18,7 @@ rustyline = "^5.0"
 log = "^0.4"
 lazy_static = "^1.2"
 atty = "^0.2"
+htmlescape = "0.3"
 reqwest = {version = "0.9", features=["socks"]}
 
 [target.'cfg(windows)'.dependencies]

@@ -88,7 +88,7 @@ impl YdResponse {
             if !basic.explains.is_empty() {
                 result.push(fmt.cyan("  Word Explanation:"));
                 for exp in &basic.explains {
-                    result.push("     * ".to_owned() + exp);
+                    result.push(fmt.default(&("     * ".to_owned() + exp)));
                 }
             }
         }

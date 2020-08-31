@@ -2,17 +2,11 @@
 #[macro_use]
 extern crate serde_derive;
 
-use atty;
-use serde_json;
-use structopt;
-
 #[macro_use]
 extern crate log;
 
 #[macro_use]
 extern crate lazy_static;
-
-use env_logger;
 
 #[cfg(windows)]
 #[cfg(feature = "clipboard")]
