@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: apt-get install -y libx11-xcb-dev libdbus-dev
     - name: Build
       run: cargo build --verbose
     - name: Run tests
