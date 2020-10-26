@@ -64,6 +64,26 @@ struct YdcvOptions {
     )]
     selection: bool,
 
+    #[cfg(windows)]
+    #[cfg(feature = "clipboard")]
+    #[structopt(
+        short = "i",
+        long = "interval",
+        help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
+        default_value = "1000"
+    )]
+    interval: u64,
+
+    #[cfg(unix)]
+    #[cfg(feature = "clipboard")]
+    #[structopt(
+        short = "i",
+        long = "interval",
+        help = "time interval between selection in msec (default: 1000 on windows and 0 on others)",
+        default_value = "0"
+    )]
+    interval: u64,
+
     #[structopt(short = "H", long = "html", help = "HTML-style output")]
     html: bool,
 
@@ -119,6 +139,9 @@ fn main() {
     #[cfg(feature = "clipboard")]
     let selection_enabled = ydcv_options.selection;
 
+    #[cfg(feature = "clipboard")]
+    let interval = ydcv_options.interval;
+
     #[cfg(not(feature = "clipboard"))]
     let selection_enabled = false;
 
@@ -166,6 +189,7 @@ fn main() {
                 println!("Waiting for selection> ");
 
                 loop {
+                    std::thread::sleep(std::time::Duration::from_millis(interval));
                     if let Ok(curr) = clipboard.load_wait(
                         clipboard.getter.atoms.primary,
                         clipboard.getter.atoms.utf8_string,
@@ -190,7 +214,7 @@ fn main() {
                 last = last.trim().to_string();
                 println!("Waiting for selection> ");
                 loop {
-                    std::thread::sleep(std::time::Duration::from_secs(1));
+                    std::thread::sleep(std::time::Duration::from_millis(interval));
                     let curr = get_clipboard(&mut clipboard).trim().to_string();
                     if curr != last {
                         last = curr.clone();
