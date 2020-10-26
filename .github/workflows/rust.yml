@@ -24,7 +24,7 @@ jobs:
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     - name: Install dependencies
-      run: sudo apt-get install -y libx11-xcb-dev libdbus-1-dev
+      run: sudo apt-get install -y libx11-xcb-dev libdbus-1-dev libxcb-shape0-dev libxcb-xfixes0-dev
     - name: Build
       run: cargo build --verbose
     - name: Run tests
