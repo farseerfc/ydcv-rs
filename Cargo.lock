@@ -2429,7 +2429,6 @@ dependencies = [
  "reqwest",
  "rustyline",
  "serde",
- "serde_derive",
  "serde_json",
  "structopt",
  "winrt-notification",

@@ -1,11 +1,4 @@
 //! main module of ydcv-rs
-#[macro_use]
-extern crate serde_derive;
-
-extern crate log;
-
-#[macro_use]
-extern crate lazy_static;
 
 #[cfg(feature = "clipboard")]
 use copypasta::ClipboardContext;
@@ -16,9 +9,9 @@ use rustyline::Editor;
 use structopt::StructOpt;
 
 mod formatters;
+mod lang;
 mod ydclient;
 mod ydresponse;
-mod lang;
 
 #[cfg(windows)]
 #[cfg(feature = "notify")]

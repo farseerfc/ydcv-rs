@@ -3,6 +3,7 @@
 use rand::{thread_rng, Rng};
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
+use lazy_static::lazy_static;
 use std::error::Error;
 use log::debug;
 use super::ydresponse::YdResponse;
