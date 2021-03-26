@@ -227,7 +227,7 @@ fn main() {
                 }
             }
         } else {
-            let mut reader = Editor::<()>::new();
+            let mut reader = Editor::<()>::new().unwrap();
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
                 reader.add_history_entry(word);

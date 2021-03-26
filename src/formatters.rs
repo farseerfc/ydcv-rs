@@ -206,8 +206,8 @@ impl Formatter for HtmlFormatter {
 #[cfg(test)]
 mod tests {
     use crate::formatters::{AnsiFormatter, HtmlFormatter, PlainFormatter};
-    use crate::ydclient::YdClient;
-    use reqwest::blocking::{Client};
+    use crate::ydclient::*;
+    use reqwest::blocking::Client;
 
     static RAW_FELIX: &'static str = r#"
     {
