@@ -7,14 +7,10 @@ extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
-#[cfg(windows)]
 #[cfg(feature = "clipboard")]
-use clipboard2::{Clipboard, SystemClipboard};
+use copypasta::ClipboardContext;
 
-#[cfg(unix)]
-#[cfg(feature = "clipboard")]
-use x11_clipboard::Clipboard;
-
+use copypasta::ClipboardProvider;
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::Editor;
 use structopt::StructOpt;
@@ -45,12 +41,6 @@ fn lookup_explain(client: &mut Client, word: &str, fmt: &mut dyn Formatter, raw:
             Err(err) => fmt.print(word, &format!("Error looking-up word {}: {:?}", word, err)),
         }
     }
-}
-
-#[cfg(windows)]
-#[cfg(feature = "clipboard")]
-fn get_clipboard(clipboard: &mut SystemClipboard) -> String {
-    clipboard.get_string_contents().unwrap_or_default()
 }
 
 #[derive(StructOpt)]
@@ -181,46 +171,20 @@ fn main() {
 
     if ydcv_options.free.is_empty() {
         if selection_enabled {
-            #[cfg(unix)]
             #[cfg(feature = "clipboard")]
             {
-                let clipboard = Clipboard::new().unwrap();
+                let mut clipboard = ClipboardContext::new().unwrap();
                 let mut last = String::new();
 
                 println!("Waiting for selection> ");
 
                 loop {
                     std::thread::sleep(std::time::Duration::from_millis(interval));
-                    if let Ok(curr) = clipboard.load_wait(
-                        clipboard.getter.atoms.primary,
-                        clipboard.getter.atoms.utf8_string,
-                        clipboard.getter.atoms.property,
-                    ) {
-                        let curr = String::from_utf8_lossy(&curr);
+                    if let Ok(curr) = clipboard.get_contents() {
                         let curr = curr.trim_matches('\u{0}').trim();
                         if !curr.is_empty() && last != curr {
                             last = curr.to_owned();
                             lookup_explain(&mut client, curr, fmt, ydcv_options.raw);
-                            println!("Waiting for selection> ");
-                        }
-                    }
-                }
-            }
-
-            #[cfg(windows)]
-            #[cfg(feature = "clipboard")]
-            {
-                let mut clipboard = SystemClipboard::new().unwrap();
-                let mut last = get_clipboard(&mut clipboard);
-                last = last.trim().to_string();
-                println!("Waiting for selection> ");
-                loop {
-                    std::thread::sleep(std::time::Duration::from_millis(interval));
-                    let curr = get_clipboard(&mut clipboard).trim().to_string();
-                    if curr != last {
-                        last = curr.clone();
-                        if !last.is_empty() {
-                            lookup_explain(&mut client, &curr, fmt, ydcv_options.raw);
                             println!("Waiting for selection> ");
                         }
                     }

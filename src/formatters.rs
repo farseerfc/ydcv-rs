@@ -1,11 +1,9 @@
 //! Formatters used by `YdResponse::explain`
 
-#[cfg(unix)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", unix))]
 use notify_rust::Notification;
 
-#[cfg(windows)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", windows))]
 use winrt_notification::{Duration, Toast};
 
 extern crate htmlescape;
@@ -54,30 +52,26 @@ impl Formatter for PlainFormatter {
 
 /// WinFormatter text formatter
 
-#[cfg(windows)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", windows))]
 pub struct WinFormatter {
     notify: bool,
 }
 
-#[cfg(windows)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", windows))]
 impl WinFormatter {
     pub fn new(notify: bool) -> WinFormatter {
         WinFormatter { notify }
     }
 }
 
-#[cfg(windows)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", windows))]
 macro_rules! ignore {
     ($($n:ident),*) => { $(
         fn $n (&self, _s: &str) -> String { "".to_owned() }
     )* }
 }
 
-#[cfg(windows)]
-#[cfg(feature = "notify")]
+#[cfg(all(feature = "notify", windows))]
 impl Formatter for WinFormatter {
     plain!(default, red, yellow, purple, underline);
     ignore!(cyan);
@@ -129,18 +123,18 @@ impl Formatter for AnsiFormatter {
 }
 
 /// HTML-style formatter, suitable for desktop notification
-#[cfg(feature = "notify-rust")]
+#[cfg(all(feature = "notify", unix))]
 pub struct HtmlFormatter {
     notify: bool,
     notifier: Notification,
     timeout: i32,
 }
 
-#[cfg(not(feature = "notify-rust"))]
+#[cfg(not(all(feature = "notify", unix)))]
 pub struct HtmlFormatter;
 
 impl HtmlFormatter {
-    #[cfg(feature = "notify-rust")]
+    #[cfg(all(feature = "notify", unix))]
     pub fn new(notify: bool) -> HtmlFormatter {
         HtmlFormatter {
             notify,
@@ -149,12 +143,12 @@ impl HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature = "notify-rust"))]
+    #[cfg(not(all(feature = "notify", unix)))]
     pub fn new(_: bool) -> HtmlFormatter {
         HtmlFormatter {}
     }
 
-    #[cfg(feature = "notify-rust")]
+    #[cfg(all(feature = "notify", unix))]
     pub fn set_timeout(&mut self, timeout: i32) {
         self.timeout = timeout;
     }
@@ -182,7 +176,7 @@ impl Formatter for HtmlFormatter {
         encode_minimal(s)
     }
 
-    #[cfg(feature = "notify-rust")]
+    #[cfg(all(feature = "notify", unix))]
     fn print(&mut self, word: &str, body: &str) {
         if self.notify {
             self.notifier
@@ -197,7 +191,7 @@ impl Formatter for HtmlFormatter {
         }
     }
 
-    #[cfg(not(feature = "notify-rust"))]
+    #[cfg(not(all(feature = "notify", unix)))]
     fn print(&mut self, _: &str, body: &str) {
         println!("{}", body);
     }

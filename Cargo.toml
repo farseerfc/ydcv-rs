@@ -22,10 +22,10 @@ htmlescape = "0.3"
 reqwest = {version = "0.11", default-features = false, features = ["socks", "blocking"]}
 rand = "0.8"
 md5 = "0.7"
+copypasta = {version = "0.8", optional = true}
 
 [target.'cfg(windows)'.dependencies]
 winrt-notification =    {version = "^0.3", optional = true}
-clipboard2 =            {version = "^0.1", optional = true}
 
 [target.'cfg(unix)'.dependencies]
 notify-rust =           {version = "^4.3", optional = true}
@@ -34,7 +34,7 @@ x11-clipboard =         {version = "^0.7", optional = true}
 [features]
 default = [ "notify", "clipboard", "rusttls" ]
 notify = ["notify-rust", "winrt-notification"]
-clipboard = ["x11-clipboard", "clipboard2"]
+clipboard = ["copypasta"]
 rusttls = ["reqwest/rustls-tls"]
 
 [profile.release]
