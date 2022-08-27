@@ -33,3 +33,6 @@ x11-clipboard =         {version = "^0.5", optional = true}
 default = [ "notify", "clipboard" ]
 notify = ["notify-rust", "winrt-notification"]
 clipboard = ["x11-clipboard", "clipboard2"]
+
+[profile.release]
+lto = true
