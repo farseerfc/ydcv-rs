@@ -5,7 +5,7 @@ use std::env::var;
 use std::error::Error;
 // use reqwest::header::Connection;
 use super::ydresponse::YdResponse;
-use crate::Client;
+use reqwest::blocking::Client;
 use reqwest::Url;
 
 lazy_static! {
