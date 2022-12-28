@@ -7,7 +7,7 @@ use std::error::Error;
 // use reqwest::header::Connection;
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
-use crate::Client;
+use reqwest::blocking::Client;
 use reqwest::Url;
 
 const NEW_API_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
@@ -52,7 +52,7 @@ pub trait YdClient {
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
-        debug!(
+        dbg!(
             "Recieved JSON {}",
             serde_json::from_str::<YdResponse>(result)
                 .and_then(|v| serde_json::to_string_pretty(&v))
