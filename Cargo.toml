@@ -20,6 +20,8 @@ lazy_static = "^1.2"
 atty = "^0.2"
 htmlescape = "0.3"
 reqwest = {version = "0.9", features=["socks"]}
+rand = "0.8"
+md5 = "0.7"
 
 [target.'cfg(windows)'.dependencies]
 winrt-notification =    {version = "^0.2", optional = true}

@@ -23,6 +23,7 @@ use structopt::StructOpt;
 mod formatters;
 mod ydclient;
 mod ydresponse;
+mod lang;
 
 #[cfg(windows)]
 #[cfg(feature = "notify")]

@@ -1,7 +1,7 @@
 //! parser for the returned result from YD
 
 use crate::formatters::Formatter;
-use serde_json::{self, Error as SerdeError};
+use serde_json::{self, Error as SerdeError, Value};
 
 /// Basic result structure
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,7 +24,7 @@ pub struct YdWeb {
 #[serde(rename_all = "camelCase")]
 pub struct YdResponse {
     query: String,
-    error_code: i32,
+    error_code: Value,
     translation: Option<Vec<String>>,
     basic: Option<YdBasic>,
     web: Option<Vec<YdWeb>>,
@@ -39,7 +39,7 @@ impl YdResponse {
     pub fn explain(&self, fmt: &dyn Formatter) -> String {
         let mut result: Vec<String> = vec![];
 
-        if self.error_code != 0
+        if self.error_code != "0" && self.error_code != 0
             || self.basic.is_none() && self.web.is_none() && self.translation.is_none()
         {
             result.push(fmt.red(" -- No result for this query."));

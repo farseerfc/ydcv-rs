@@ -1,12 +1,17 @@
 //! ydclient is client wrapper for Client
 
+use rand::{thread_rng, Rng};
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use std::error::Error;
 // use reqwest::header::Connection;
 use super::ydresponse::YdResponse;
+use crate::lang::is_chinese;
 use crate::Client;
 use reqwest::Url;
+
+const NEW_API_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
+const NEW_APP_SEC: Option<&str> = option_env!("YD_NEW_APP_SEC");
 
 lazy_static! {
     /// API name
@@ -52,18 +57,35 @@ impl YdClient for Client {
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
         use std::io::Read;
 
-        let mut url = Url::parse("https://fanyi.youdao.com/openapi.do")?;
-        url.query_pairs_mut().extend_pairs(
-            [
-                ("keyfrom", API.as_str()),
-                ("key", API_KEY.as_str()),
-                ("type", "data"),
-                ("doctype", "json"),
-                ("version", "1.1"),
-                ("q", word),
-            ]
-            .iter(),
-        );
+        let url = if let (Some(new_api_key), Some(new_app_sec)) = (NEW_API_KEY, NEW_APP_SEC) {
+            let to = get_translation_lang(word);
+
+            let salt = get_salt();
+            let sign = get_sign(new_api_key, word, &salt, new_app_sec);
+            api(
+                "https://openapi.youdao.com/api",
+                &[
+                    ("appKey", new_api_key),
+                    ("q", word),
+                    ("from", "auto"),
+                    ("to", to),
+                    ("salt", &salt),
+                    ("sign", &sign),
+                ],
+            )?
+        } else {
+            api(
+                "https://fanyi.youdao.com/openapi.do",
+                &[
+                    ("keyfrom", API.as_str()),
+                    ("key", API_KEY.as_str()),
+                    ("type", "data"),
+                    ("doctype", "json"),
+                    ("version", "1.1"),
+                ],
+            )?
+        };
+
         let mut body = String::new();
         self.get(url)
             // .header(Connection::close())
@@ -77,6 +99,35 @@ impl YdClient for Client {
             self.decode_result(&body).map_err(Into::into)
         }
     }
+}
+
+fn api(url: &str, query: &[(&str, &str)]) -> Result<Url, Box<dyn Error>> {
+    let mut url = Url::parse(url)?;
+    url.query_pairs_mut().extend_pairs(query.iter());
+
+    Ok(url)
+}
+
+fn get_sign(api_key: &str, word: &str, salt: &str, app_sec: &str) -> String {
+    let sign = md5::compute(format!("{}{}{}{}", api_key, word, &salt, app_sec));
+    let sign = format!("{:x}", sign);
+
+    sign
+}
+
+fn get_salt() -> String {
+    let mut rng = thread_rng();
+    let rand_int = rng.gen_range(1..65536);
+    let salt = rand_int.to_string();
+
+    salt
+}
+
+fn get_translation_lang(word: &str) -> &str {
+    let word_is_chinese = is_chinese(word);
+    let to = if word_is_chinese { "EN" } else { "zh-CHS" };
+
+    to
 }
 
 #[cfg(test)]
