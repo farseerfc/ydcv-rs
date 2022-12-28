@@ -30,7 +30,7 @@ lazy_static! {
 
     /// New API APPSEC in Runtime
     static ref NEW_APP_SEC_RT: String = var("YD_NEW_APP_SEC")
-        .unwrap_or_else(|_| String::from("1323298384"));
+        .unwrap_or_else(|_| String::from("ydcv-rs"));
 }
 
 /// Wrapper trait on `reqwest::Client`
@@ -52,11 +52,13 @@ pub trait YdClient {
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
+        let pretty_json = serde_json::from_str::<YdResponse>(result)
+            .and_then(|v| serde_json::to_string_pretty(&v));
         dbg!(
-            "Recieved JSON {}",
-            serde_json::from_str::<YdResponse>(result)
-                .and_then(|v| serde_json::to_string_pretty(&v))
-                .unwrap()
+            "Recieved JSON: ", match pretty_json {
+                Ok(r) => r,
+                Err(_) => result.to_owned()
+            }
         );
         serde_json::from_str(result)
     }
@@ -78,6 +80,7 @@ impl YdClient for Client {
                     ("type", "data"),
                     ("doctype", "json"),
                     ("version", "1.1"),
+                    ("q", word),
                 ],
             )?
         };
