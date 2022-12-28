@@ -39,7 +39,7 @@ pub trait YdClient {
 /// Implement wrapper client trait on `reqwest::Client`
 impl YdClient for Client {
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
-        debug!(
+        dbg!(
             "Recieved JSON {}",
             serde_json::from_str::<YdResponse>(result)
                 .and_then(|v| serde_json::to_string_pretty(&v))
