@@ -23,6 +23,14 @@ lazy_static! {
     static ref API_KEY: String = var("YDCV_API_KEY")
         .unwrap_or_else(|_| var("YDCV_YOUDAO_APPSEC")
         .unwrap_or_else(|_| String::from("1323298384")));
+
+    /// New API APPKEY in Runtime
+    static ref NEW_API_KEY_RT: String = var("YD_NEW_APP_KEY")
+        .unwrap_or_else(|_| String::from("ydcv-rs"));
+
+    /// New API APPSEC in Runtime
+    static ref NEW_APP_SEC_RT: String = var("YD_NEW_APP_SEC")
+        .unwrap_or_else(|_| String::from("ydcv-rs"));
 }
 
 /// Wrapper trait on `reqwest::Client`
@@ -58,21 +66,9 @@ impl YdClient for Client {
         use std::io::Read;
 
         let url = if let (Some(new_api_key), Some(new_app_sec)) = (NEW_API_KEY, NEW_APP_SEC) {
-            let to = get_translation_lang(word);
-
-            let salt = get_salt();
-            let sign = get_sign(new_api_key, word, &salt, new_app_sec);
-            api(
-                "https://openapi.youdao.com/api",
-                &[
-                    ("appKey", new_api_key),
-                    ("q", word),
-                    ("from", "auto"),
-                    ("to", to),
-                    ("salt", &salt),
-                    ("sign", &sign),
-                ],
-            )?
+            new_api(word, new_api_key, new_app_sec)?
+        } else if NEW_API_KEY_RT.as_str() != "ydcv-rs" && NEW_APP_SEC_RT.as_str() != "ydcv-rs" {
+            new_api(word, NEW_API_KEY_RT.as_str(), NEW_APP_SEC_RT.as_str())?
         } else {
             api(
                 "https://fanyi.youdao.com/openapi.do",
@@ -101,6 +97,24 @@ impl YdClient for Client {
     }
 }
 
+fn new_api(word: &str, new_api_key: &str, new_app_sec: &str) -> Result<Url, Box<dyn Error>> {
+    let to = get_translation_lang(word);
+    let salt = get_salt();
+    let sign = get_sign(new_api_key, word, &salt, new_app_sec);
+
+    Ok(api(
+        "https://openapi.youdao.com/api",
+        &[
+            ("appKey", new_api_key),
+            ("q", word),
+            ("from", "auto"),
+            ("to", to),
+            ("salt", &salt),
+            ("sign", &sign),
+        ],
+    )?)
+}
+
 fn api(url: &str, query: &[(&str, &str)]) -> Result<Url, Box<dyn Error>> {
     let mut url = Url::parse(url)?;
     url.query_pairs_mut().extend_pairs(query.iter());
@@ -125,9 +139,12 @@ fn get_salt() -> String {
 
 fn get_translation_lang(word: &str) -> &str {
     let word_is_chinese = is_chinese(word);
-    let to = if word_is_chinese { "EN" } else { "zh-CHS" };
 
-    to
+    if word_is_chinese {
+        "EN"
+    } else {
+        "zh-CHS"
+    }
 }
 
 #[cfg(test)]
