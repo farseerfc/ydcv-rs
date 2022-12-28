@@ -30,7 +30,7 @@ lazy_static! {
 
     /// New API APPSEC in Runtime
     static ref NEW_APP_SEC_RT: String = var("YD_NEW_APP_SEC")
-        .unwrap_or_else(|_| String::from("ydcv-rs"));
+        .unwrap_or_else(|_| String::from("1323298384"));
 }
 
 /// Wrapper trait on `reqwest::Client`
