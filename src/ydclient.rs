@@ -4,7 +4,7 @@ use rand::{thread_rng, Rng};
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use std::error::Error;
-// use reqwest::header::Connection;
+use log::debug;
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
 use reqwest::blocking::Client;
@@ -54,8 +54,8 @@ impl YdClient for Client {
     fn decode_result(&mut self, result: &str) -> Result<YdResponse, SerdeError> {
         let pretty_json = serde_json::from_str::<YdResponse>(result)
             .and_then(|v| serde_json::to_string_pretty(&v));
-        dbg!(
-            "Recieved JSON: ", match pretty_json {
+        debug!(
+            "Recieved JSON {}", match pretty_json {
                 Ok(r) => r,
                 Err(_) => result.to_owned()
             }
