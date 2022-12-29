@@ -6,7 +6,7 @@ readme = "README.md"
 license = "GPL-2.0"
 version = "0.5.1"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 structopt = "^0.3"
