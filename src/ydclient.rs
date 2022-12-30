@@ -3,6 +3,7 @@
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
 use log::debug;
+use md5::{Md5, Digest};
 use rand::{thread_rng, Rng};
 use reqwest::blocking::Client;
 use reqwest::Url;
@@ -182,8 +183,13 @@ fn api(url: &str, query: &[(&str, &str)]) -> Result<Url, Box<dyn Error>> {
 }
 
 fn get_sign(api_key: &str, word: &str, salt: &str, app_sec: &str) -> String {
-    let sign = md5::compute(format!("{}{}{}{}", api_key, word, &salt, app_sec));
-    let sign = format!("{:x}", sign);
+    let sign_no_md5 = format!("{}{}{}{}", api_key, word, &salt, app_sec);
+
+    let mut hasher = Md5::new();
+    hasher.update(sign_no_md5);
+
+    let sign = hasher.finalize();
+    let sign = format!("{:2x}", sign);
 
     sign
 }
