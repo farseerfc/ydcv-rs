@@ -16,8 +16,8 @@ use std::io::Read;
 use std::time::SystemTime;
 use sha2::Digest;
 
-const NEW_API_ID: Option<&str> = option_env!("YD_NEW_APP_KEY");
-const NEW_APP_KEY: Option<&str> = option_env!("YD_NEW_APP_SEC");
+const NEW_API_ID: Option<&str> = option_env!("YD_NEW_APP_ID");
+const NEW_APP_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
 
 lazy_static! {
     /// API name
@@ -31,11 +31,11 @@ lazy_static! {
         .unwrap_or_else(|_| String::from("1323298384")));
 
     /// New API APPKEY in Runtime
-    static ref NEW_API_KEY_ID: String = var("YD_NEW_APP_KEY")
+    static ref NEW_API_KEY_ID: String = var("YD_NEW_APP_ID")
         .unwrap_or_else(|_| String::from("ydcv-rs"));
 
     /// New API APPSEC in Runtime
-    static ref NEW_APP_KEY_RT: String = var("YD_NEW_APP_SEC")
+    static ref NEW_APP_KEY_RT: String = var("YD_NEW_APP_KEY")
         .unwrap_or_else(|_| String::from("ydcv-rs"));
 }
 
