@@ -47,6 +47,28 @@ impl YdResponse {
     pub fn from_html(body: &str, word: &str) -> Result<YdResponse, String> {
         let html = Html::parse_document(body);
         let is_chinese = is_chinese(word);
+
+        let no_data = Selector::parse(".no-data-prompt").map_err(|e| e.to_string())?;
+        let mut is_no_data = false;
+        html.select(&no_data).for_each(|x| {
+            x.text().into_iter().for_each(|_| {
+                is_no_data = true;
+                return;
+            });
+        });
+
+        if is_no_data {
+            return Ok(YdResponse {
+                query: word.to_string(),
+                error_code: 1.into(),
+                inner: YdResponseInner {
+                    translation: None,
+                    basic: None,
+                    web: None,
+                },
+            });
+        }
+
         let res = if is_chinese {
             Self::zh2en(&html)
         } else {
@@ -171,7 +193,7 @@ impl YdResponse {
         let per_phone = Selector::parse(".phone_con .per-phone .phonetic")?;
         html.select(&per_phone).for_each(|x| {
             x.text().into_iter().for_each(|x| {
-                phonetic.push_str(x);
+                phonetic.push_str(x.replace("/", "").trim());
                 return;
             });
         });
@@ -201,7 +223,7 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: Some(translations),
+            translation: translations.get(0).map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
                 explains,
                 phonetic: Some(phonetic),
@@ -220,7 +242,7 @@ impl YdResponse {
         let phonetic = Selector::parse(".phone_con .per-phone .phonetic")?;
         html.select(&phonetic).for_each(|x| {
             x.text().into_iter().for_each(|x| {
-                per_phone.push(x.to_string());
+                per_phone.push(x.replace("/", "").trim().to_string());
             });
         });
 
@@ -240,7 +262,7 @@ impl YdResponse {
             });
         });
 
-        let translations = translations
+        let translations_format = translations
             .iter()
             .enumerate()
             .map(|(i, c)| {
@@ -277,9 +299,13 @@ impl YdResponse {
         }
 
         let resp = YdResponseInner {
-            translation: None,
+            translation: translations
+                .get(0)
+                .and_then(|x| x.split("，").next())
+                .or(translations.get(0).map(|x| x.as_str()))
+                .map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
-                explains: translations,
+                explains: translations_format,
                 phonetic: per_phone.get(0).map(|x| x.clone()),
                 us_phonetic: None,
                 uk_phonetic: None,
