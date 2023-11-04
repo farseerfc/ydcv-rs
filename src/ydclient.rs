@@ -7,6 +7,7 @@ use md5::{Md5, Digest};
 use rand::{thread_rng, Rng};
 use reqwest::blocking::Client;
 use reqwest::Url;
+use reqwest::header::{USER_AGENT, REFERER};
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
 use lazy_static::lazy_static;
@@ -89,9 +90,9 @@ impl YdClient for Client {
 
     /// lookup a word on YD and returns a `YdResponse`
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
-        let body = lookup_word_old_api(word, self);
+        let body = lookup_word(word, self);
 
-        let body = if let Err(old_api_err) = body {
+        if let Err(old_api_err) = body {
             let body = lookup_word_new_api(word, self);
 
             if let Err(new_api_err) = body {
@@ -101,38 +102,39 @@ impl YdClient for Client {
                 )));
             }
 
-            body
-        } else {
-            body
-        }?;
+            let body = body.unwrap();
 
-        let raw_result = YdResponse::new_raw(body.clone());
-
-        if raw {
-            raw_result.map_err(Into::into)
+            if raw {
+                YdResponse::new_raw(body).map_err(Into::into)
+            } else {
+                self.decode_result(&body).map_err(Into::into)
+            }
         } else {
-            self.decode_result(&body).map_err(Into::into)
+            let body = body?;
+            
+            if raw {
+                YdResponse::new_raw(body).map_err(Into::into)
+            } else {
+                YdResponse::from_html(&body, word).map_err(Into::into)
+            }
         }
     }
 }
 
-fn lookup_word_old_api(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
+fn lookup_word(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
     let url = api(
-        "https://fanyi.youdao.com/openapi.do",
+        "https://www.youdao.com/result",
         &[
-            ("keyfrom", API.as_str()),
-            ("key", API_KEY.as_str()),
-            ("type", "data"),
-            ("doctype", "json"),
-            ("version", "1.1"),
-            ("q", word),
+            ("word", word),
+            ("lang", "en")
         ],
     )?;
 
     let mut body = String::new();
     client
         .get(url)
-        // .header(Connection::close())
+        .header(REFERER, "https://www.youdao.com")
+        .header(USER_AGENT, "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0")
         .send()?
         .read_to_string(&mut body)?;
 

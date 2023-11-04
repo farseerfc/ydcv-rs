@@ -22,6 +22,8 @@ reqwest = {version = "0.11", default-features = false, features = ["socks", "blo
 rand = "0.8"
 md-5 = "0.10"
 copypasta = {version = "0.8", optional = true}
+scraper = "0.18"
+itertools = { default-features = false, version = "0.10.5" }
 
 [target.'cfg(windows)'.dependencies]
 winrt-notification =    {version = "^0.3", optional = true}
