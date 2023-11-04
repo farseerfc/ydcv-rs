@@ -243,7 +243,13 @@ impl YdResponse {
         let translations = translations
             .iter()
             .enumerate()
-            .map(|(i, c)| format!("{} {c}", poss[i]))
+            .map(|(i, c)| {
+                if let Some(pos) = poss.get(i) {
+                    format!("{} {c}", pos)
+                } else {
+                    c.to_string()
+                }
+            })
             .collect::<Vec<_>>();
 
         let mut keys = vec![];
@@ -274,7 +280,7 @@ impl YdResponse {
             translation: None,
             basic: Some(YdBasic {
                 explains: translations,
-                phonetic: Some(per_phone[0].clone()),
+                phonetic: per_phone.get(0).map(|x| x.clone()),
                 us_phonetic: None,
                 uk_phonetic: None,
             }),
