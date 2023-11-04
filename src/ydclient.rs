@@ -2,15 +2,15 @@
 
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
+use lazy_static::lazy_static;
 use log::debug;
-use md5::{Md5, Digest};
+use md5::{Digest, Md5};
 use rand::{thread_rng, Rng};
 use reqwest::blocking::Client;
+use reqwest::header::{REFERER, USER_AGENT};
 use reqwest::Url;
-use reqwest::header::{USER_AGENT, REFERER};
 use serde_json::{self, Error as SerdeError};
 use std::env::var;
-use lazy_static::lazy_static;
 use std::error::Error;
 use std::fmt::{self, Debug};
 use std::io::Read;
@@ -111,7 +111,7 @@ impl YdClient for Client {
             }
         } else {
             let body = body?;
-            
+
             if raw {
                 YdResponse::new_raw(body).map_err(Into::into)
             } else {
@@ -124,17 +124,17 @@ impl YdClient for Client {
 fn lookup_word(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
     let url = api(
         "https://www.youdao.com/result",
-        &[
-            ("word", word),
-            ("lang", "en")
-        ],
+        &[("word", word), ("lang", "en")],
     )?;
 
     let mut body = String::new();
     client
         .get(url)
         .header(REFERER, "https://www.youdao.com")
-        .header(USER_AGENT, "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0")
+        .header(
+            USER_AGENT,
+            "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0",
+        )
         .send()?
         .read_to_string(&mut body)?;
 
@@ -199,9 +199,8 @@ fn get_sign(api_key: &str, word: &str, salt: &str, app_sec: &str) -> String {
 fn get_salt() -> String {
     let mut rng = thread_rng();
     let rand_int = rng.gen_range(1..65536);
-    let salt = rand_int.to_string();
 
-    salt
+    rand_int.to_string()
 }
 
 fn get_translation_lang(word: &str) -> &str {
@@ -217,7 +216,6 @@ fn get_translation_lang(word: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use Client;
 
     #[test]
     fn test_lookup_word_0() {

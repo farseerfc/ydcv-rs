@@ -203,7 +203,7 @@ mod tests {
     use crate::ydclient::*;
     use reqwest::blocking::Client;
 
-    static RAW_FELIX: &'static str = r#"
+    static RAW_FELIX: &str = r#"
     {
         "translation":["费利克斯"],
         "basic":{

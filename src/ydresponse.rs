@@ -51,9 +51,8 @@ impl YdResponse {
         let no_data = Selector::parse(".no-data-prompt").map_err(|e| e.to_string())?;
         let mut is_no_data = false;
         html.select(&no_data).for_each(|x| {
-            x.text().into_iter().for_each(|_| {
+            x.text().for_each(|_| {
                 is_no_data = true;
-                return;
             });
         });
 
@@ -176,7 +175,7 @@ impl YdResponse {
         let trans = Selector::parse(".basic .col2 .word-exp .point")?;
         let mut translations = vec![];
         html.select(&trans).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 translations.push(x.to_string());
             });
         });
@@ -184,7 +183,7 @@ impl YdResponse {
         let mut explains = vec![];
         let explains_query = Selector::parse(".basic .col2 .word-exp .point")?;
         html.select(&explains_query).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 explains.push(x.to_string());
             });
         });
@@ -192,9 +191,8 @@ impl YdResponse {
         let mut phonetic = String::new();
         let per_phone = Selector::parse(".phone_con .per-phone .phonetic")?;
         html.select(&per_phone).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
-                phonetic.push_str(x.replace("/", "").trim());
-                return;
+            x.text().for_each(|x| {
+                phonetic.push_str(x.replace('/', "").trim());
             });
         });
 
@@ -203,12 +201,12 @@ impl YdResponse {
         let key = Selector::parse(".web_trans .col2 .point")?;
         let value = Selector::parse(".web_trans .col2 .sen-phrase")?;
         html.select(&key).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 keys.push(x);
             });
         });
         html.select(&value).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 values.push(x.split(" ; ").map(|x| x.to_string()).collect::<Vec<_>>());
             });
         });
@@ -241,15 +239,15 @@ impl YdResponse {
         let mut per_phone = vec![];
         let phonetic = Selector::parse(".phone_con .per-phone .phonetic")?;
         html.select(&phonetic).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
-                per_phone.push(x.replace("/", "").trim().to_string());
+            x.text().for_each(|x| {
+                per_phone.push(x.replace('/', "").trim().to_string());
             });
         });
 
         let mut poss = vec![];
         let pos = Selector::parse(".basic .word-exp .pos")?;
         html.select(&pos).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 poss.push(x.to_string());
             });
         });
@@ -257,7 +255,7 @@ impl YdResponse {
         let mut translations = vec![];
         let trans = Selector::parse(".basic .word-exp .trans")?;
         html.select(&trans).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 translations.push(x.to_string());
             });
         });
@@ -279,12 +277,12 @@ impl YdResponse {
         let key = Selector::parse(".web_trans .col2 .point")?;
         let value = Selector::parse(".web_trans .col2 .sen-phrase")?;
         html.select(&key).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 keys.push(x);
             });
         });
         html.select(&value).for_each(|x| {
-            x.text().into_iter().for_each(|x| {
+            x.text().for_each(|x| {
                 values.push(x.split(" ; ").map(|x| x.to_string()).collect::<Vec<_>>());
             });
         });
@@ -301,12 +299,12 @@ impl YdResponse {
         let resp = YdResponseInner {
             translation: translations
                 .get(0)
-                .and_then(|x| x.split("，").next())
+                .and_then(|x| x.split('，').next())
                 .or(translations.get(0).map(|x| x.as_str()))
                 .map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
                 explains: translations_format,
-                phonetic: per_phone.get(0).map(|x| x.clone()),
+                phonetic: per_phone.get(0).cloned(),
                 us_phonetic: None,
                 uk_phonetic: None,
             }),
