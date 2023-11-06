@@ -340,6 +340,8 @@ Felix ['fi:liks] 费利克斯
        <span color="purple">不予置评</span>；<span color="purple">无可奉告</span>；<span color="purple">不予回答</span>；<span color="purple">无意见</span>
      * <span color="goldenrod">Fair comment</span>
        <span color="purple">公正评论</span>；<span color="purple">公允评论</span>；<span color="purple">合理评论</span>；<span color="purple">公正的评论</span>
+     * <span color="goldenrod">conditional comment</span>
+       <span color="purple">条件注释</span>
 "#,
             result
         );

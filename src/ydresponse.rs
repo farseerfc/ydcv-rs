@@ -237,12 +237,31 @@ impl YdResponse {
     /// Lookup words by English word.
     fn en2zh(html: &Html) -> Result<YdResponseInner, SelectorErrorKind> {
         let mut per_phone = vec![];
-        let phonetic = Selector::parse(".phone_con .per-phone .phonetic")?;
+        let phonetic = Selector::parse(".phone_con .per-phone")?;
         html.select(&phonetic).for_each(|x| {
             x.text().for_each(|x| {
                 per_phone.push(x.replace('/', "").trim().to_string());
             });
         });
+
+        let mut uk_phonetic = None;
+        let mut us_phonetic = None;
+        for (i, c) in per_phone.iter().enumerate() {
+            if c == "英" {
+                uk_phonetic = per_phone.get(i + 1).map(|x| x.to_string());
+            } else if c == "美" {
+                us_phonetic = per_phone.get(i + 1).map(|x| x.to_string());
+            }
+        }
+
+        if us_phonetic.is_none() && uk_phonetic.is_none() {
+            let phonetic = Selector::parse(".phone_con .per-phone .phonetic")?;
+            html.select(&phonetic).for_each(|x| {
+                x.text().for_each(|x| {
+                    per_phone.push(x.replace('/', "").trim().to_string());
+                });
+            });
+        }
 
         let mut poss = vec![];
         let pos = Selector::parse(".basic .word-exp .pos")?;
@@ -304,9 +323,12 @@ impl YdResponse {
                 .map(|x| vec![x.to_string()]),
             basic: Some(YdBasic {
                 explains: translations_format,
-                phonetic: per_phone.get(0).cloned(),
-                us_phonetic: None,
-                uk_phonetic: None,
+                phonetic: us_phonetic
+                    .clone()
+                    .or(uk_phonetic.clone())
+                    .or(per_phone.get(0).map(|x| x.to_string())),
+                us_phonetic,
+                uk_phonetic,
             }),
             web: Some(webs),
         };
