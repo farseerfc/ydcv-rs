@@ -2,9 +2,9 @@
 
 use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
-use lazy_static::lazy_static;
 use log::debug;
 use md5::{Digest, Md5};
+use once_cell::sync::Lazy;
 use rand::{thread_rng, Rng};
 use reqwest::blocking::Client;
 use reqwest::header::{REFERER, USER_AGENT};
@@ -18,25 +18,13 @@ use std::io::Read;
 const NEW_API_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
 const NEW_APP_SEC: Option<&str> = option_env!("YD_NEW_APP_SEC");
 
-lazy_static! {
-    /// API name
-    static ref API: String = var("YDCV_API_NAME")
-        .unwrap_or_else(|_| var("YDCV_YOUDAO_APPID")
-        .unwrap_or_else(|_| String::from("ydcv-rs")));
+/// New API APPKEY in Runtime
+static NEW_API_KEY_RT: Lazy<String> =
+    Lazy::new(|| var("YD_NEW_APP_KEY").unwrap_or_else(|_| String::from("ydcv-rs")));
 
-    /// API key
-    static ref API_KEY: String = var("YDCV_API_KEY")
-        .unwrap_or_else(|_| var("YDCV_YOUDAO_APPSEC")
-        .unwrap_or_else(|_| String::from("1323298384")));
-
-    /// New API APPKEY in Runtime
-    static ref NEW_API_KEY_RT: String = var("YD_NEW_APP_KEY")
-        .unwrap_or_else(|_| String::from("ydcv-rs"));
-
-    /// New API APPSEC in Runtime
-    static ref NEW_APP_SEC_RT: String = var("YD_NEW_APP_SEC")
-        .unwrap_or_else(|_| String::from("ydcv-rs"));
-}
+/// New API APPSEC in Runtime
+static NEW_APP_SEC_RT: Lazy<String> =
+    Lazy::new(|| var("YD_NEW_APP_SEC").unwrap_or_else(|_| String::from("ydcv-rs")));
 
 #[derive(Debug)]
 enum YdClientErr {

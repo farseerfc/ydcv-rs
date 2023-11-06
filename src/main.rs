@@ -5,6 +5,8 @@ use copypasta::ClipboardContext;
 
 use copypasta::ClipboardProvider;
 use reqwest::blocking::{Client, ClientBuilder};
+use rustyline::config::Builder;
+use rustyline::history::FileHistory;
 use rustyline::Editor;
 use structopt::StructOpt;
 
@@ -184,10 +186,13 @@ fn main() {
                 }
             }
         } else {
-            let mut reader = Editor::<()>::new().unwrap();
+            let mut reader = Editor::<(), FileHistory>::with_config(
+                Builder::new().auto_add_history(true).build(),
+            )
+            .unwrap();
+
             while let Ok(w) = reader.readline("> ") {
                 let word = w.trim();
-                reader.add_history_entry(word);
                 if !word.is_empty() {
                     lookup_explain(&mut client, word, fmt, ydcv_options.raw);
                 }
