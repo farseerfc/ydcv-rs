@@ -112,11 +112,7 @@ impl YdClient for Client {
         } else {
             let body = body?;
 
-            if raw {
-                YdResponse::new_raw(body).map_err(Into::into)
-            } else {
-                YdResponse::from_html(&body, word).map_err(Into::into)
-            }
+            YdResponse::from_html(&body, word).map_err(Into::into)
         }
     }
 }
