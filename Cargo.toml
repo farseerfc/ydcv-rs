@@ -32,10 +32,10 @@ notify-rust =           {version = "^4.3", optional = true}
 x11-clipboard =         {version = "^0.8", optional = true}
 
 [features]
-default = [ "notify", "clipboard", "rusttls" ]
+default = [ "notify", "clipboard", "rustls" ]
 notify = ["notify-rust", "winrt-notification"]
 clipboard = ["copypasta"]
-rusttls = ["reqwest/rustls-tls"]
+rustls = ["reqwest/rustls-tls"]
 
 [profile.release]
 lto = true
