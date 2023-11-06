@@ -4,20 +4,19 @@ use super::ydresponse::YdResponse;
 use crate::lang::is_chinese;
 use lazy_static::lazy_static;
 use log::debug;
+use md5::{Digest, Md5};
 use rand::{thread_rng, Rng};
 use reqwest::blocking::Client;
+use reqwest::header::{REFERER, USER_AGENT};
 use reqwest::Url;
 use serde_json::{self, Error as SerdeError};
-use sha2::Sha256;
 use std::env::var;
 use std::error::Error;
 use std::fmt::{self, Debug};
 use std::io::Read;
-use std::time::SystemTime;
-use sha2::Digest;
 
-const NEW_API_ID: Option<&str> = option_env!("YD_NEW_APP_ID");
-const NEW_APP_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
+const NEW_API_KEY: Option<&str> = option_env!("YD_NEW_APP_KEY");
+const NEW_APP_SEC: Option<&str> = option_env!("YD_NEW_APP_SEC");
 
 lazy_static! {
     /// API name
@@ -31,11 +30,11 @@ lazy_static! {
         .unwrap_or_else(|_| String::from("1323298384")));
 
     /// New API APPKEY in Runtime
-    static ref NEW_API_KEY_ID: String = var("YD_NEW_APP_ID")
+    static ref NEW_API_KEY_RT: String = var("YD_NEW_APP_KEY")
         .unwrap_or_else(|_| String::from("ydcv-rs"));
 
     /// New API APPSEC in Runtime
-    static ref NEW_APP_KEY_RT: String = var("YD_NEW_APP_KEY")
+    static ref NEW_APP_SEC_RT: String = var("YD_NEW_APP_SEC")
         .unwrap_or_else(|_| String::from("ydcv-rs"));
 }
 
@@ -91,95 +90,76 @@ impl YdClient for Client {
 
     /// lookup a word on YD and returns a `YdResponse`
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
-        let resp = lookup_word_old_api(word, self).and_then(|body| {
-            if raw {
-                YdResponse::new_raw(body).map_err(|e| Box::new(e) as Box<dyn Error>)
-            } else {
-                self.decode_result(&body)
-                    .map_err(|e| Box::new(e) as Box<dyn Error>)
-            }
-        });
+        let body = lookup_word(word, self);
 
-        let resp = if let Err(old_api_err) = resp {
-            let resp = lookup_word_new_api(word, self).and_then(|body| {
-                if raw {
-                    YdResponse::new_raw(body).map_err(|e| Box::new(e) as Box<dyn Error>)
-                } else {
-                    self.decode_result(&body)
-                        .map_err(|e| Box::new(e) as Box<dyn Error>)
-                }
-            });
+        if let Err(old_api_err) = body {
+            let body = lookup_word_new_api(word, self);
 
-            if let Err(new_api_err) = resp {
+            if let Err(new_api_err) = body {
                 return Err(Box::new(YdClientErr::NewAndOldAPIError(
                     new_api_err.to_string(),
                     old_api_err.to_string(),
                 )));
             }
 
-            resp
-        } else {
-            resp
-        }?;
+            let body = body.unwrap();
 
-        Ok(resp)
+            if raw {
+                YdResponse::new_raw(body).map_err(Into::into)
+            } else {
+                self.decode_result(&body).map_err(Into::into)
+            }
+        } else {
+            let body = body?;
+
+            YdResponse::from_html(&body, word).map_err(Into::into)
+        }
     }
 }
 
-fn lookup_word_old_api(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
+fn lookup_word(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
     let url = api(
-        "https://fanyi.youdao.com/openapi.do",
-        &[
-            ("keyfrom", API.as_str()),
-            ("key", API_KEY.as_str()),
-            ("type", "data"),
-            ("doctype", "json"),
-            ("version", "1.1"),
-            ("q", word),
-        ],
+        "https://www.youdao.com/result",
+        &[("word", word), ("lang", "en")],
     )?;
 
     let mut body = String::new();
     client
         .get(url)
-        // .header(Connection::close())
+        .header(REFERER, "https://www.youdao.com")
+        .header(
+            USER_AGENT,
+            "Mozilla/5.0 (X11; AOSC OS; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/117.0",
+        )
         .send()?
-        .error_for_status()?
         .read_to_string(&mut body)?;
 
     Ok(body)
 }
 
 fn lookup_word_new_api(word: &str, client: &Client) -> Result<String, Box<dyn Error>> {
-    let (new_api_id, new_app_key) =
-        if let (Some(new_api_id), Some(new_app_key)) = (NEW_API_ID, NEW_APP_KEY) {
-            (new_api_id, new_app_key)
-        } else if NEW_API_KEY_ID.as_str() != "ydcv-rs" && NEW_APP_KEY_RT.as_str() != "ydcv-rs" {
-            (NEW_API_KEY_ID.as_str(), NEW_APP_KEY_RT.as_str())
+    let (new_api_key, new_app_sec) =
+        if let (Some(new_api_key), Some(new_app_sec)) = (NEW_API_KEY, NEW_APP_SEC) {
+            (new_api_key, new_app_sec)
+        } else if NEW_API_KEY_RT.as_str() != "ydcv-rs" && NEW_APP_SEC_RT.as_str() != "ydcv-rs" {
+            (NEW_API_KEY_RT.as_str(), NEW_APP_SEC_RT.as_str())
         } else {
             return Err(Box::new(YdClientErr::NewApiValueError));
         };
 
     let to = get_translation_lang(word);
-    let ts = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)?
-        .as_secs()
-        .to_string();
-
     let salt = get_salt();
-    let sign = get_sign(new_api_id, word, &salt, new_app_key, &ts);
+    let sign = get_sign(new_api_key, word, &salt, new_app_sec);
 
     let url = api(
         "https://openapi.youdao.com/api",
         &[
-            ("appKey", new_api_id),
+            ("appKey", new_api_key),
             ("q", word),
             ("from", "auto"),
             ("to", to),
             ("salt", &salt),
             ("sign", &sign),
-            ("signType", "v3"),
-            ("curtime", &ts),
         ],
     )?;
 
@@ -197,16 +177,14 @@ fn api(url: &str, query: &[(&str, &str)]) -> Result<Url, Box<dyn Error>> {
     let mut url = Url::parse(url)?;
     url.query_pairs_mut().extend_pairs(query.iter());
 
-    debug!("url: {url}");
-
     Ok(url)
 }
 
-fn get_sign(api_id: &str, word: &str, salt: &str, app_key: &str, curtime: &str) -> String {
-    let sign = format!("{}{}{}{}{}", api_id, word, &salt, curtime, app_key);
+fn get_sign(api_key: &str, word: &str, salt: &str, app_sec: &str) -> String {
+    let sign_no_md5 = format!("{}{}{}{}", api_key, word, &salt, app_sec);
 
-    let mut hasher = Sha256::new();
-    hasher.update(sign);
+    let mut hasher = Md5::new();
+    hasher.update(sign_no_md5);
 
     let sign = hasher.finalize();
     let sign = format!("{:2x}", sign);
@@ -217,9 +195,8 @@ fn get_sign(api_id: &str, word: &str, salt: &str, app_key: &str, curtime: &str) 
 fn get_salt() -> String {
     let mut rng = thread_rng();
     let rand_int = rng.gen_range(1..65536);
-    let salt = rand_int.to_string();
 
-    salt
+    rand_int.to_string()
 }
 
 fn get_translation_lang(word: &str) -> &str {
@@ -235,7 +212,6 @@ fn get_translation_lang(word: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use Client;
 
     #[test]
     fn test_lookup_word_0() {

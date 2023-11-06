@@ -46,4 +46,3 @@ fn is_chinese_char(ch: char) -> bool {
         _ => false,
     }
 }
-

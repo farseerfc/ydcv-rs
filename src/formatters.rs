@@ -203,7 +203,7 @@ mod tests {
     use crate::ydclient::*;
     use reqwest::blocking::Client;
 
-    static RAW_FELIX: &'static str = r#"
+    static RAW_FELIX: &str = r#"
     {
         "translation":["费利克斯"],
         "basic":{
@@ -303,15 +303,13 @@ Felix ['fi:liks] 费利克斯
         let result = format!(
             "\n{}\n",
             Client::new()
-                .lookup_word("asdakda", false)
+                .lookup_word("hakunamatata", false)
                 .unwrap()
                 .explain(&HtmlFormatter::new(false))
         );
         assert_eq!(
             r#"
-<u>asdakda</u>
-<span color="navy">  Translation:</span>
-    asdakda
+<span color="red"> -- No result for this query.</span>
 "#,
             result
         );
@@ -328,18 +326,18 @@ Felix ['fi:liks] 费利克斯
         );
         assert_eq!(
             r#"
-<u>comment</u> [<span color="goldenrod">ˈkɒment</span>] 评论
+<u>comment</u>  UK: [<span color="goldenrod">ˈkɒment</span>], US: [<span color="goldenrod">ˈkɑːment</span>] 评论
 <span color="navy">  Word Explanation:</span>
      * n. 评论，意见；批评，指责；说明，写照；&lt;旧&gt;解说，注释；（计算机）注解
      * v. 评论，发表意见；（计算机）注解，把（部分程序）转成注解
      * 【名】 （Comment）（美、瑞、法）科门特（人名）
 <span color="navy">  Web Reference:</span>
-     * <span color="goldenrod">Comment</span>
-       <span color="purple">注释</span>；<span color="purple">注解</span>；<span color="purple">客户点评</span>
      * <span color="goldenrod">No Comment</span>
        <span color="purple">不予置评</span>；<span color="purple">无可奉告</span>；<span color="purple">不予回答</span>；<span color="purple">无意见</span>
      * <span color="goldenrod">Fair comment</span>
        <span color="purple">公正评论</span>；<span color="purple">公允评论</span>；<span color="purple">合理评论</span>；<span color="purple">公正的评论</span>
+     * <span color="goldenrod">conditional comment</span>
+       <span color="purple">条件注释</span>
 "#,
             result
         );
