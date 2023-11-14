@@ -2,7 +2,7 @@
 
 #[cfg(feature = "clipboard")]
 use copypasta::ClipboardContext;
-
+#[cfg(feature = "clipboard")]
 use copypasta::ClipboardProvider;
 use reqwest::blocking::{Client, ClientBuilder};
 use rustyline::config::Builder;

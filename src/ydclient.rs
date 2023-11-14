@@ -76,7 +76,13 @@ impl YdClient for Client {
         serde_json::from_str(result)
     }
 
+    #[cfg(all(not(feature = "native-tls"), not(feature = "rustls")))]
+    fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
+        panic!("https access has been disabled in this build of ydcv-rs");
+    }
+
     /// lookup a word on YD and returns a `YdResponse`
+    #[cfg(any(feature = "native-tls", feature = "rustls"))]
     fn lookup_word(&mut self, word: &str, raw: bool) -> Result<YdResponse, Box<dyn Error>> {
         let body = lookup_word(word, self);
 
