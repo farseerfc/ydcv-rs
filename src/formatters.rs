@@ -342,4 +342,31 @@ Felix ['fi:liks] 费利克斯
             result
         );
     }
+
+    #[test]
+    fn test_explain_html_3() {
+        let result = format!(
+            "\n{}\n",
+            Client::new()
+                .lookup_word("暂时", false)
+                .unwrap()
+                .explain(&HtmlFormatter::new(false))
+        );
+        assert_eq!(
+            r#"
+<u>暂时</u> [<span color="goldenrod">zàn shí</span>] for the time being
+<span color="navy">  Word Explanation:</span>
+     * for the time being
+     * for the moment
+<span color="navy">  Web Reference:</span>
+     * <span color="goldenrod">暂时的</span>
+       <span color="purple">科技  temporary</span>；<span color="purple">interim</span>；<span color="purple">provisional</span>；<span color="purple">科技  temporal</span>
+     * <span color="goldenrod">今天暂时停止</span>
+       <span color="purple">Groundhog Day</span>；<span color="purple">Groundhog Day Phil Connors</span>；<span color="purple">The Groundhug Day</span>
+     * <span color="goldenrod">暂时性</span>
+       <span color="purple">Temporary</span>；<span color="purple">caducity</span>；<span color="purple">transiency</span>；<span color="purple">transient</span>
+"#,
+            result
+        );
+    }
 }

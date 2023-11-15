@@ -206,9 +206,13 @@ impl YdResponse {
             });
         });
         html.select(&value).for_each(|x| {
-            x.text().for_each(|x| {
-                values.push(x.split(" ; ").map(|x| x.to_string()).collect::<Vec<_>>());
-            });
+            let v = x
+                .text()
+                .collect::<String>()
+                .split(" ; ")
+                .map(|x| x.trim().to_string())
+                .collect::<Vec<_>>();
+            values.push(v);
         });
 
         let mut webs = vec![];
@@ -301,9 +305,13 @@ impl YdResponse {
             });
         });
         html.select(&value).for_each(|x| {
-            x.text().for_each(|x| {
-                values.push(x.split(" ; ").map(|x| x.to_string()).collect::<Vec<_>>());
-            });
+            let v = x
+                .text()
+                .collect::<String>()
+                .split(" ; ")
+                .map(|x| x.trim().to_string())
+                .collect::<Vec<_>>();
+            values.push(v);
         });
 
         let mut webs = vec![];
