@@ -4,7 +4,7 @@ description = "A rust version of YouDao Console Version"
 repository = "https://github.com/farseerfc/ydcv-rs"
 readme = "README.md"
 license = "GPL-2.0"
-version = "0.6.2"
+version = "0.6.3"
 authors = ["Jiachen Yang <farseerfc@gmail.com>"]
 edition = "2021"
 
